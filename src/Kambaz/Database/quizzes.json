@@ -1,7 +1,7 @@
 [
     {
       "_id": "QUIZ1",
-      "course": "CS1234", 
+      "course": "RS101", 
       "title": "React Components Quiz",
       "instructions": "Students will build and style reusable React components, focusing on props, state, and lifecycle methods.",
       "published": false,
@@ -24,5 +24,31 @@
       "oneQuestionAtATime": true,
       "webcamRequired": true,
       "lockQuestionsAfterAnswering": true  
+    },
+    {
+      "_id": "QUIZ2",
+      "course": "RS101", 
+      "title": "React MUI Icons Quiz",
+      "instructions": "Students will learn how to use and style React MUI icons.",
+      "published": false,
+      "availableFrom": "2024-04-10T23:59:59Z",
+      "availableUntil": "2024-04-24T23:59:59Z",
+      "due": "2024-04-17T23:59:59Z",
+      "points": "50",
+      "questions": ["QUESTION201", "QUESTION202"],
+      "attempts": ["ATTEMPT201"],
+      "quizType": "Graded Quiz",
+      "assignmentGroup": "QUIZZES",
+      "shuffleAnswers": false,
+      "hasTimeLimit": false,
+      "timeLimitLength": "15 Minutes",
+      "hasMultipleAttempts": false,
+      "numAttempts": "2",
+      "showCorrectAnswers": true,
+      "whenToShowCorrectAnswers": "0",
+      "accessCode": "2893fnws9w",
+      "oneQuestionAtATime": false,
+      "webcamRequired": true,
+      "lockQuestionsAfterAnswering": true  
     }
-  ]
+]

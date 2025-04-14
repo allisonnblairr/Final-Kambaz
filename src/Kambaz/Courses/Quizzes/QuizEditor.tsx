@@ -14,6 +14,8 @@ export default function QuizEditor() {
   const { cid, qid } = useParams();
   const quiz = db.quizzes.find((quiz) => quiz._id === qid);
 
+  const [activeKey, setActiveKey] = useState("details");
+
   const [published, setPublished] = useState(quiz ? quiz.published : false);
   const [quizName, setQuizName] = useState(quiz ? quiz.title : "Unnamed Quiz");
   const [quizInstructions, setQuizInstructions] = useState(
@@ -98,30 +100,62 @@ export default function QuizEditor() {
 
   return (
     <div id="wd-quiz-editor">
-      <div className="float-end">
-        Points {points}{" "}
-        <Button onClick={() => setPublished(!published)}>
-          {published ? (
-            <div>
-              <FaCheckCircle className="text-success me-1 fs-5 mb-1" />
-              Published
-            </div>
-          ) : (
-            <div>
-              <RxCircleBackslash className="text-danger fs-5 me-1 mb-1" />
-              Not Published
-            </div>
-          )}
-        </Button>{" "}
-        <Button className="btn-sm">
-          <IoEllipsisVertical className="fs-5" />
-        </Button>
-      </div>
+      <Row>
+        <Col md={8}></Col>
+        <Col md={4}>
+          <div>
+            Points {points}{" "}
+            <Button
+              onClick={() => setPublished(!published)}
+              style={{
+                backgroundColor: "white",
+                color: "black",
+                border: "0px",
+              }}
+            >
+              {published ? (
+                <div>
+                  <FaCheckCircle className="text-success me-1 fs-5 mb-1" />
+                  Published
+                </div>
+              ) : (
+                <div>
+                  <RxCircleBackslash className="text-danger fs-5 me-1 mb-1" />
+                  Not Published
+                </div>
+              )}
+            </Button>{" "}
+            <Button
+              className="btn-sm"
+              style={{
+                backgroundColor: "lightgray",
+                color: "black",
+                borderColor: "gray",
+              }}
+            >
+              <IoEllipsisVertical className="fs-5" />
+            </Button>
+          </div>
+        </Col>
+      </Row>
+      <hr />
       <Tabs
-        defaultActiveKey="details"
+        activeKey={activeKey}
+        onSelect={(k) => {
+          if (k !== null) setActiveKey(k);
+        }}
         style={{ width: "1100px", marginBottom: "20px" }}
       >
-        <Tab eventKey="details" title="Details">
+        <Tab
+          eventKey="details"
+          title={
+            activeKey === "details" ? (
+              <span style={{ color: "black" }}>Details</span>
+            ) : (
+              <span className="text-danger">Details</span>
+            )
+          }
+        >
           <Form>
             <Form.Group className="col-6 mb-3">
               <Form.Control
@@ -139,10 +173,18 @@ export default function QuizEditor() {
                 <Col md={8}></Col>
                 <Col md={4} className="text-end">
                   <div>
-                    <FaRegKeyboard className="fs-5" /> | 0 words |{" "}
-                    <FaCode className="fs-5" /> |{" "}
-                    <RiExpandDiagonalSLine className="fs-3" /> |{" "}
-                    <BsGripVertical className="fs-5" />
+                    <FaRegKeyboard className="fs-5 text-danger" />{" "}
+                    <span style={{ color: "black" }}>|</span>{" "}
+                    <span className="text-danger">0 words</span>{" "}
+                    <span style={{ color: "black" }}>|</span>{" "}
+                    <FaCode className="fs-5 text-danger" />{" "}
+                    <span style={{ color: "black" }}>|</span>{" "}
+                    <RiExpandDiagonalSLine className="fs-3 text-danger" />{" "}
+                    <span style={{ color: "black" }}>|</span>{" "}
+                    <BsGripVertical
+                      className="fs-5 border border-danger rounded-1"
+                      style={{ color: "black" }}
+                    />
                   </div>
                 </Col>
               </Row>
@@ -284,7 +326,10 @@ export default function QuizEditor() {
               </Row>
               <Row className="mb-3">
                 <Col md={3} />
-                <Col md={7} className="form-border d-flex">
+                <Col
+                  md={7}
+                  className="p-2 border border-2 border-gray rounded-1 d-flex"
+                >
                   <Form.Check
                     defaultChecked={webcamRequired}
                     onChange={(e) => setWebcamRequired(e.target.checked)}
@@ -294,7 +339,10 @@ export default function QuizEditor() {
               </Row>
               <Row className="mb-3">
                 <Col md={3} />
-                <Col md={7} className="form-border d-flex">
+                <Col
+                  md={7}
+                  className="p-3 border border-2 border-gray rounded-1 d-flex"
+                >
                   <Col md={6}>
                     <Form.Check
                       defaultChecked={multipleAttempts}
@@ -316,17 +364,25 @@ export default function QuizEditor() {
               </Row>
             </Form.Group>
             <Form.Group>
-              <Row className="mb-1">
+              <Row>
                 <Col md={3} className="text-end">
                   <Form.Label htmlFor="wd-assign-to">Assign</Form.Label>
                 </Col>
-                <Col md={6} className="form-border">
-                  <Row className="mb-3">
+                <Col
+                  md={6}
+                  className="border border-2 border-gray rounded-1"
+                  style={{ width: "600px", height: "300px" }}
+                >
+                  <Row className="mt-3 mb-3">
                     <Form.Label htmlFor="wd-assign-to">
                       <b>Assign to</b>
                     </Form.Label>
                     <Col>
-                      <Form.Control id="wd-assign-to" value={"Everyone"} />
+                      <Form.Control
+                        id="wd-assign-to"
+                        value={"Everyone"}
+                        readOnly
+                      />
                     </Col>
                   </Row>
                   <Row className="mb-3">
@@ -368,31 +424,55 @@ export default function QuizEditor() {
                   </Row>
                 </Col>
               </Row>
-              <Row className="col-6 offset-md-3 mb-3">
-                <Button>+ Add</Button>
-              </Row>
             </Form.Group>
+            <Row className="offset-md-3 mb-3">
+              <Button
+                style={{
+                  backgroundColor: "lightgray",
+                  border: "0px",
+                  color: "black",
+                  width: "600px",
+                }}
+              >
+                + Add
+              </Button>
+            </Row>
+            <hr className="mx-auto w-25" />
             <Row className="mt-3">
               <Col className="offset-md-5">
                 <Link
                   to={`/Kambaz/Courses/${cid}/Quizzes`}
                   className="btn btn-primary px-3 py-2 me-2"
+                  style={{
+                    backgroundColor: "lightgray",
+                    borderColor: "gray",
+                    color: "black",
+                  }}
                 >
                   Cancel
                 </Link>
                 <Link
                   onClick={handleSave}
-                  // fix this link URL
-                  to={`/Kambaz/Courses/${cid}/Quizzes/QUIZ1/Details`}
+                  to={`/Kambaz/Courses/${cid}/Quizzes/${quiz?._id}/Details`}
                   className="btn btn-danger px-3 py-2 text-white"
                 >
                   Save
                 </Link>
               </Col>
             </Row>
+            <hr className="mx-auto w-25" />
           </Form>
         </Tab>
-        <Tab eventKey="questions" title="Questions"></Tab>
+        <Tab
+          eventKey="questions"
+          title={
+            activeKey === "questions" ? (
+              <span style={{ color: "black" }}>Questions</span>
+            ) : (
+              <span className="text-danger">Questions</span>
+            )
+          }
+        ></Tab>
       </Tabs>
     </div>
   );
