@@ -112,9 +112,9 @@ export default function QuizEditor() {
             <Button
               onClick={() => setPublished(!published)}
               style={{
-                backgroundColor: "white",
+                backgroundColor: "lightgray",
                 color: "black",
-                border: "0px",
+                borderColor: "gray",
               }}
             >
               {published ? (
