@@ -3,6 +3,7 @@ import { FiSearch } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { IoEllipsisVertical } from "react-icons/io5";
 
 export default function QuizMenu() {
   const { cid } = useParams();
@@ -45,6 +46,16 @@ export default function QuizMenu() {
               style={{ bottom: "1px", height: "25px" }}
             />
             Quiz
+          </Button>
+          <Button
+            className="btn-sm"
+            style={{
+              backgroundColor: "lightgray",
+              color: "black",
+              borderColor: "gray",
+            }}
+          >
+            <IoEllipsisVertical className="fs-5" />
           </Button>
         </div>
       </div>
