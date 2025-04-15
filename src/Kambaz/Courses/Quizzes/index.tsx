@@ -4,15 +4,12 @@ import { Link, useParams } from "react-router-dom";
 import * as db from "../../Database";
 import { HiOutlineRocketLaunch } from "react-icons/hi2";
 import { FaCheckCircle } from "react-icons/fa";
-import Button from "react-bootstrap/esm/Button";
 import { RxCircleBackslash } from "react-icons/rx";
-import { useState } from "react";
 import { IoEllipsisVertical } from "react-icons/io5";
 
 export default function Quizzes() {
   const { cid } = useParams();
   const quizzes = db.quizzes.filter((quiz) => quiz.course === cid);
-  const [published, setPublished] = useState(false);
 
   return (
     <div id="wd-quizzes">
@@ -79,16 +76,11 @@ export default function Quizzes() {
                     </div>
                   </div>
                   <div className="float-end">
-                    <Button
-                      className="btn-sm bg-white border-0"
-                      onClick={() => setPublished(!published)}
-                    >
-                      {published ? (
-                        <FaCheckCircle className="text-success fs-5" />
-                      ) : (
-                        <RxCircleBackslash className="text-danger fs-5" />
-                      )}
-                    </Button>
+                    {quiz.published ? (
+                      <FaCheckCircle className="text-success fs-5" />
+                    ) : (
+                      <RxCircleBackslash className="text-danger fs-5" />
+                    )}
                     <IoEllipsisVertical className="fs-5" />
                   </div>
                 </li>

@@ -92,7 +92,11 @@ export default function QuizEditor() {
       lockQuestionsAfterAnswering: lockQuestionsAfterAnswering,
     };
     if (quiz) {
-      db.quizzes.map((quiz) => (quiz._id === qid ? quizPayload : quiz));
+      db.quizzes.forEach((quiz, index) => {
+        if (quiz._id === qid) {
+          db.quizzes[index] = quizPayload;
+        }
+      });
     } else {
       db.quizzes.push(quizPayload);
     }
