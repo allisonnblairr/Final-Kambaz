@@ -6,10 +6,44 @@ import { HiOutlineRocketLaunch } from "react-icons/hi2";
 import { FaCheckCircle } from "react-icons/fa";
 import { RxCircleBackslash } from "react-icons/rx";
 import { IoEllipsisVertical } from "react-icons/io5";
+import Button from "react-bootstrap/esm/Button";
+import { useState } from "react";
+import FormSelect from "react-bootstrap/esm/FormSelect";
+import { useNavigate } from "react-router-dom";
 
 export default function Quizzes() {
   const { cid } = useParams();
   const quizzes = db.quizzes.filter((quiz) => quiz.course === cid);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
+  const navigate = useNavigate();
+
+  const handlePublishStatusChange = (id: string, published: boolean) => {
+    const publishedStatusChange = !published;
+    db.quizzes.forEach((quiz, index) => {
+      if (quiz._id === id) {
+        db.quizzes[index] = { ...quiz, published: publishedStatusChange };
+      }
+    });
+  };
+
+  const handleContextMenuOptionChange = (
+    quizId: string,
+    published: boolean,
+    value: string
+  ) => {
+    setContextMenuValue(value);
+    if (value === "edit") {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Details`);
+    }
+    if (value === "delete") {
+      const index = db.quizzes.findIndex((quiz) => quiz._id === quizId);
+      db.quizzes.splice(index, 1);
+    }
+    if (value === "publish" || value === "unpublish") {
+      handlePublishStatusChange(quizId, published);
+    }
+  };
 
   return (
     <div id="wd-quizzes">
@@ -76,12 +110,53 @@ export default function Quizzes() {
                     </div>
                   </div>
                   <div className="float-end">
-                    {quiz.published ? (
-                      <FaCheckCircle className="text-success fs-5" />
-                    ) : (
-                      <RxCircleBackslash className="text-danger fs-5" />
+                    <Button
+                      className="btn-sm bg-white border-0"
+                      onClick={() =>
+                        handlePublishStatusChange(quiz._id, quiz.published)
+                      }
+                    >
+                      {quiz.published ? (
+                        <FaCheckCircle className="text-success fs-5" />
+                      ) : (
+                        <RxCircleBackslash className="text-danger fs-5" />
+                      )}
+                    </Button>
+                    <Button
+                      className="btn-sm"
+                      style={{
+                        backgroundColor: "white",
+                        color: "black",
+                        border: "0px",
+                      }}
+                      onClick={() => setContextMenuOpen(!contextMenuOpen)}
+                    >
+                      <IoEllipsisVertical className="fs-5" />
+                    </Button>
+                    {contextMenuOpen && (
+                      <FormSelect
+                        className="mt-3"
+                        value={contextMenuValue}
+                        onChange={(e) =>
+                          handleContextMenuOptionChange(
+                            quiz._id,
+                            quiz.published,
+                            e.target.value
+                          )
+                        }
+                      >
+                        <option value="select-an-option">
+                          Select an Option
+                        </option>
+                        <option value="edit">Edit</option>
+                        <option value="delete">Delete</option>
+                        <option
+                          value={quiz.published ? "unpublish" : "publish"}
+                        >
+                          {quiz.published ? "Unpublish" : "Publish"}
+                        </option>
+                      </FormSelect>
                     )}
-                    <IoEllipsisVertical className="fs-5" />
                   </div>
                 </li>
               ))}
