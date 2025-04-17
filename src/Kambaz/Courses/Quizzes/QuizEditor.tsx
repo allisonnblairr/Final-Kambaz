@@ -7,14 +7,15 @@ import { FaCode } from "react-icons/fa6";
 import { RiExpandDiagonalSLine } from "react-icons/ri";
 import { BsGripVertical } from "react-icons/bs";
 import Editor from "react-simple-wysiwyg";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import * as db from "../../Database";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
   const quiz = db.quizzes.find((quiz) => quiz._id === qid);
-
+  const navigate = useNavigate();
   const [activeKey, setActiveKey] = useState("details");
+  const [publishButtonClicked, setPublishButtonClicked] = useState(false);
 
   const [published, setPublished] = useState(quiz ? quiz.published : false);
   const [quizName, setQuizName] = useState(quiz ? quiz.title : "Unnamed Quiz");
@@ -27,7 +28,6 @@ export default function QuizEditor() {
   const [assignmentGroup, setAssignmentGroup] = useState(
     quiz ? quiz.assignmentGroup : "quizzes"
   );
-  const [points, setPoints] = useState(quiz ? quiz.points : "");
   const [accessCode, setAccessCode] = useState(quiz ? quiz.accessCode : "");
   const [shuffleAnswers, setShuffleAnswers] = useState(
     quiz ? quiz.shuffleAnswers : true
@@ -64,6 +64,15 @@ export default function QuizEditor() {
     quiz ? quiz.availableUntil : ""
   );
 
+  const handlePublishButtonClick = () => {
+    setPublished(!published);
+    setPublishButtonClicked(true);
+  };
+
+  const handleCancel = () => {
+    navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+  };
+
   const handleSave = () => {
     const quizPayload = {
       _id: quiz ? (qid as string) : "QUIZ" + String(db.quizzes.length + 1),
@@ -74,7 +83,7 @@ export default function QuizEditor() {
       availableFrom: availableFromDate,
       availableUntil: availableUntilDate,
       due: dueDate,
-      points: points,
+      points: quiz ? quiz.points : "0",
       questions: [],
       attempts: [],
       quizType: quizType,
@@ -100,6 +109,12 @@ export default function QuizEditor() {
     } else {
       db.quizzes.push(quizPayload);
     }
+
+    if (publishButtonClicked) {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    } else {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz?._id}/Details`);
+    }
   };
 
   return (
@@ -108,9 +123,9 @@ export default function QuizEditor() {
         <Col md={8}></Col>
         <Col md={4}>
           <div>
-            Points {points}{" "}
+            Points {quiz ? quiz.points : "0"}{" "}
             <Button
-              onClick={() => setPublished(!published)}
+              onClick={handlePublishButtonClick}
               style={{
                 backgroundColor: "lightgray",
                 color: "black",
@@ -225,17 +240,6 @@ export default function QuizEditor() {
                     <option value="assignments">ASSIGNMENTS</option>
                     <option value="projects">PROJECTS</option>
                   </Form.Select>
-                </Col>
-              </Row>
-              <Row className="mb-3">
-                <Col md={3} className="text-end">
-                  <Form.Label>Points</Form.Label>
-                </Col>
-                <Col md={4}>
-                  <Form.Control
-                    value={points}
-                    onChange={(e) => setPoints(e.target.value)}
-                  />
                 </Col>
               </Row>
               <Row className="mb-3">
@@ -444,8 +448,8 @@ export default function QuizEditor() {
             <hr className="mx-auto w-25" />
             <Row className="mt-3">
               <Col className="offset-md-5">
-                <Link
-                  to={`/Kambaz/Courses/${cid}/Quizzes`}
+                <Button
+                  onClick={handleCancel}
                   className="btn btn-primary px-3 py-2 me-2"
                   style={{
                     backgroundColor: "lightgray",
@@ -454,14 +458,13 @@ export default function QuizEditor() {
                   }}
                 >
                   Cancel
-                </Link>
-                <Link
+                </Button>
+                <Button
                   onClick={handleSave}
-                  to={`/Kambaz/Courses/${cid}/Quizzes/${quiz?._id}/Details`}
                   className="btn btn-danger px-3 py-2 text-white"
                 >
                   Save
-                </Link>
+                </Button>
               </Col>
             </Row>
             <hr className="mx-auto w-25" />
