@@ -20,30 +20,42 @@ export default function Kambaz() {
   const findCoursesForUser = async () => {
     try {
       const courses = await userClient.findCoursesForUser(currentUser._id);
-      setCourses(courses);
+      const validEnrolledCourses = courses.filter((enrollment: any) => enrollment !== null);
+      setCourses(validEnrolledCourses);
     } catch (error) {
       console.error(error);
     }
   };
 
   const fetchCourses = async () => {
+    if (!currentUser) {
+      return;
+    }
+  
     try {
       const allCourses = await courseClient.fetchAllCourses();
-      const enrolledCourses = await userClient.findCoursesForUser(
-        currentUser._id
-      );
-      const courses = allCourses.map((course: any) => {
-        if (enrolledCourses.find((c: any) => c._id === course._id)) {
-          return { ...course, enrolled: true };
-        } else {
-          return course;
-        }
+      const enrolledCourses = await userClient.findCoursesForUser(currentUser._id);
+  
+      const validEnrolledCourses = (enrolledCourses || [])
+        .filter((enrollment: any) => enrollment !== null && enrollment._id)
+        .map((enrollment: any) => ({ ...enrollment, _id: String(enrollment._id) }));
+  
+      const normalizedAllCourses = allCourses.map((course: any) => ({
+        ...course,
+        _id: String(course._id),
+      }));
+  
+      const courses = normalizedAllCourses.map((course: any) => {
+        const isEnrolled = validEnrolledCourses.some((enrolled: any) => enrolled._id === course._id);
+        return { ...course, enrolled: isEnrolled };
       });
+  
       setCourses(courses);
     } catch (error) {
       console.error(error);
     }
   };
+  
 
   useEffect(() => {
     if (enrolling) {
