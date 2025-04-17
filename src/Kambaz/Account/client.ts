@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-const axiosWithCredentials = axios.create({ withCredentials: true });
+const axiosWithCredentials = axios.create({
+  baseURL: "http://localhost:4000",
+  withCredentials: true,
+});
 export const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;
 export const USERS_API = `${REMOTE_SERVER}/api/users`;
 
@@ -64,9 +67,10 @@ export const signout = async () => {
   const response = await axiosWithCredentials.post(`${USERS_API}/signout`);
   return response.data;
 };
-export const findCoursesForUser = async (userId: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const findCoursesForUser = async (_userId: string) => {
   const response = await axiosWithCredentials.get(
-    `${USERS_API}/${userId}/courses`
+    `${USERS_API}/current/courses`
   );
   return response.data;
 };
@@ -84,15 +88,15 @@ export const findMyEnrollments = async () => {
   );
   return data;
 };
-export const enrollIntoCourse = async (userId: string, courseId: string) => {
+export const enrollIntoCourse = async (_userId: string, courseId: string) => {
   const response = await axiosWithCredentials.post(
-    `${USERS_API}/${userId}/courses/${courseId}`
+    `${USERS_API}/current/courses/${courseId}`
   );
   return response.data;
 };
-export const unenrollFromCourse = async (userId: string, courseId: string) => {
+export const unenrollFromCourse = async (_userId: string, courseId: string) => {
   const response = await axiosWithCredentials.delete(
-    `${USERS_API}/${userId}/courses/${courseId}`
+    `${USERS_API}/current/courses/${courseId}`
   );
   return response.data;
 };
