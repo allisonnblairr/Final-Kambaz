@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import { Button, Col, Form, Row, Tab, Tabs } from "react-bootstrap";
 import { RxCircleBackslash } from "react-icons/rx";
 import { IoEllipsisVertical } from "react-icons/io5";
@@ -8,113 +9,35 @@ import { RiExpandDiagonalSLine } from "react-icons/ri";
 import { BsGripVertical } from "react-icons/bs";
 import Editor from "react-simple-wysiwyg";
 import { useNavigate, useParams } from "react-router-dom";
-import * as db from "../../Database";
+import { addQuiz, updateQuiz } from "./reducer";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
-  const quiz = db.quizzes.find((quiz) => quiz._id === qid);
+  const [quiz, setQuiz] = useState<any>({});
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const dispatch = useDispatch()
   const navigate = useNavigate();
+  const [editingMode, setEditingMode] = useState(false);
+  
+  useEffect(() => {
+    const foundQuiz = quizzes.find((q: any) => q._id === qid);
+    if (foundQuiz) {
+      setQuiz(foundQuiz);
+      setEditingMode(true);
+    }
+  }, [qid, quizzes]);
+
   const [activeKey, setActiveKey] = useState("details");
   const [publishButtonClicked, setPublishButtonClicked] = useState(false);
 
-  const [published, setPublished] = useState(quiz ? quiz.published : false);
-  const [quizName, setQuizName] = useState(quiz ? quiz.title : "Unnamed Quiz");
-  const [quizInstructions, setQuizInstructions] = useState(
-    quiz ? quiz.instructions : ""
-  );
-  const [quizType, setQuizType] = useState(
-    quiz ? quiz.quizType : "graded-quiz"
-  );
-  const [assignmentGroup, setAssignmentGroup] = useState(
-    quiz ? quiz.assignmentGroup : "quizzes"
-  );
-  const [accessCode, setAccessCode] = useState(quiz ? quiz.accessCode : "");
-  const [shuffleAnswers, setShuffleAnswers] = useState(
-    quiz ? quiz.shuffleAnswers : true
-  );
-  const [oneQuestionAtATime, setOneQuestionAtATime] = useState(
-    quiz ? quiz.oneQuestionAtATime : true
-  );
-  const [lockQuestionsAfterAnswering, setLockQuestionsAfterAnswering] =
-    useState(quiz ? quiz.lockQuestionsAfterAnswering : false);
-  const [showCorrectAnswers, setShowCorrectAnswers] = useState(
-    quiz ? quiz.showCorrectAnswers : false
-  );
-  const [showCorrectAnswersDays, setShowCorrectAnswersDays] = useState(
-    quiz ? quiz.whenToShowCorrectAnswers : ""
-  );
-  const [timeLimit, setTimeLimit] = useState(quiz ? quiz.hasTimeLimit : true);
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(
-    quiz ? quiz.timeLimitLength : "20"
-  );
-  const [webcamRequired, setWebcamRequired] = useState(
-    quiz ? quiz.webcamRequired : false
-  );
-  const [multipleAttempts, setMultipleAttempts] = useState(
-    quiz ? quiz.hasMultipleAttempts : false
-  );
-  const [numberOfAttempts, setNumberOfAttempts] = useState(
-    quiz ? quiz.numAttempts : "1"
-  );
-  const [dueDate, setDueDate] = useState(quiz ? quiz.due : "");
-  const [availableFromDate, setAvailableFromDate] = useState(
-    quiz ? quiz.availableFrom : ""
-  );
-  const [availableUntilDate, setAvailableUntilDate] = useState(
-    quiz ? quiz.availableUntil : ""
-  );
-
   const handlePublishButtonClick = () => {
-    setPublished(!published);
+    setQuiz({ ...quiz, published: !quiz.published });
     setPublishButtonClicked(true);
-  };
+  };  
 
   const handleCancel = () => {
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-  };
-
-  const handleSave = () => {
-    const quizPayload = {
-      _id: quiz ? (qid as string) : "QUIZ" + String(db.quizzes.length + 1),
-      course: cid as string,
-      title: quizName,
-      instructions: quizInstructions,
-      published: published,
-      availableFrom: availableFromDate,
-      availableUntil: availableUntilDate,
-      due: dueDate,
-      points: quiz ? quiz.points : "0",
-      questions: [],
-      attempts: [],
-      quizType: quizType,
-      assignmentGroup: assignmentGroup,
-      shuffleAnswers: shuffleAnswers,
-      hasTimeLimit: timeLimit,
-      timeLimitLength: timeLimitMinutes,
-      hasMultipleAttempts: multipleAttempts,
-      numAttempts: numberOfAttempts,
-      showCorrectAnswers: showCorrectAnswers,
-      whenToShowCorrectAnswers: showCorrectAnswersDays,
-      accessCode: accessCode,
-      oneQuestionAtATime: oneQuestionAtATime,
-      webcamRequired: webcamRequired,
-      lockQuestionsAfterAnswering: lockQuestionsAfterAnswering,
-    };
-    if (quiz) {
-      db.quizzes.forEach((quiz, index) => {
-        if (quiz._id === qid) {
-          db.quizzes[index] = quizPayload;
-        }
-      });
-    } else {
-      db.quizzes.push(quizPayload);
-    }
-
-    if (publishButtonClicked) {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-    } else {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz?._id}/Details`);
-    }
   };
 
   return (
@@ -132,7 +55,7 @@ export default function QuizEditor() {
                 borderColor: "gray",
               }}
             >
-              {published ? (
+              {quiz.published ? (
                 <div>
                   <FaCheckCircle className="text-success me-1 fs-5 mb-1" />
                   Published
@@ -178,15 +101,17 @@ export default function QuizEditor() {
           <Form>
             <Form.Group className="col-6 mb-3">
               <Form.Control
-                value={quizName}
-                onChange={(e) => setQuizName(e.target.value)}
+                value={quiz?.title || "Unnamed Quiz"}
+                onChange={(e) =>
+                  setQuiz({ ...quiz, title: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group className="col-10 mb-3">
               <Form.Label>Quiz Instructions:</Form.Label>
               <Editor
-                value={quizInstructions}
-                onChange={(e) => setQuizInstructions(e.target.value)}
+                value={quiz.instructions || ""}
+                onChange={(e) => setQuiz({ ...quiz, instructions: e.target.value })}
               />
               <Row className="mt-3">
                 <Col md={8}></Col>
@@ -216,8 +141,8 @@ export default function QuizEditor() {
                 </Col>
                 <Col md={4}>
                   <Form.Select
-                    value={quizType}
-                    onChange={(e) => setQuizType(e.target.value)}
+                    value={quiz.quizType || "graded-quiz"}
+                    onChange={(e) => setQuiz({ ...quiz, quizType: e.target.value })}
                   >
                     <option value="graded-quiz">Graded Quiz</option>
                     <option value="practice-quiz">Practice Quiz</option>
@@ -232,8 +157,8 @@ export default function QuizEditor() {
                 </Col>
                 <Col md={4}>
                   <Form.Select
-                    value={assignmentGroup}
-                    onChange={(e) => setAssignmentGroup(e.target.value)}
+                    value={quiz.assignmentGroup || "quizzes"}
+                    onChange={(e) => setQuiz({ ...quiz, assignmentGroup: e.target.value })}
                   >
                     <option value="quizzes">QUIZZES</option>
                     <option value="exams">EXAMS</option>
@@ -248,8 +173,8 @@ export default function QuizEditor() {
                 </Col>
                 <Col md={4}>
                   <Form.Control
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
+                    value={quiz.accessCode || ""}
+                    onChange={(e) => setQuiz({ ...quiz, accessCode: e.target.value })}
                   />
                 </Col>
               </Row>
@@ -266,8 +191,8 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={5} className="d-flex">
                   <Form.Check
-                    defaultChecked={shuffleAnswers}
-                    onChange={(e) => setShuffleAnswers(e.target.checked)}
+                    checked={quiz.shuffleAnswers || true}
+                    onChange={(e) => setQuiz({ ...quiz, shuffleAnswers: e.target.checked })}
                     label="Shuffle Answers"
                   />
                 </Col>
@@ -276,8 +201,8 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={5} className="d-flex">
                   <Form.Check
-                    defaultChecked={oneQuestionAtATime}
-                    onChange={(e) => setOneQuestionAtATime(e.target.checked)}
+                    checked={quiz.oneQuestionAtATime || true}
+                    onChange={(e) => setQuiz({ ...quiz, oneQuestionAtATime: e.target.checked })}
                     label="One Question at a Time"
                   />
                 </Col>
@@ -286,10 +211,8 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={5} className="d-flex">
                   <Form.Check
-                    defaultChecked={lockQuestionsAfterAnswering}
-                    onChange={(e) =>
-                      setLockQuestionsAfterAnswering(e.target.checked)
-                    }
+                    checked={quiz.lockQuestionsAfterAnswering || false}
+                    onChange={(e) => setQuiz({ ...quiz, lockQuestionsAfterAnswering: e.target.checked })}
                     label="Lock Questions After Answering"
                   />
                 </Col>
@@ -298,16 +221,14 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={2} className="d-flex">
                   <Form.Check
-                    defaultChecked={showCorrectAnswers}
-                    onChange={(e) => setShowCorrectAnswers(e.target.checked)}
-                    label="Show Correct Answers"
-                  />
+                    checked={quiz.showCorrectAnswers || false}
+                    onChange={(e) => setQuiz({ ...quiz, showCorrectAnswers: e.target.checked })}
+                    label="Show Correct Answers"/>
                 </Col>
                 <Col md={1}>
                   <Form.Control
-                    value={showCorrectAnswersDays}
-                    onChange={(e) => setShowCorrectAnswersDays(e.target.value)}
-                  />
+                    value={quiz.whenToShowCorrectAnswers || ""}
+                    onChange={(e) => setQuiz({ ...quiz, showCorrectAnswersDays: e.target.value })}/>
                 </Col>
                 <Col md={2}>
                   <Form.Label>Days After Due Date</Form.Label>
@@ -317,16 +238,14 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={2} className="d-flex">
                   <Form.Check
-                    defaultChecked={timeLimit}
-                    onChange={(e) => setTimeLimit(e.target.checked)}
-                    label="Time Limit"
-                  />
+                    checked={quiz.hasTimeLimit || true}
+                    onChange={(e) => setQuiz({ ...quiz, timeLimit: e.target.checked })}
+                    label="Time Limit"/>
                 </Col>
                 <Col md={1}>
                   <Form.Control
-                    value={timeLimitMinutes}
-                    onChange={(e) => setTimeLimitMinutes(e.target.value)}
-                  />
+                    value={quiz.timeLimitLength || "20"}
+                    onChange={(e) => setQuiz({ ...quiz, timeLimitMinutes: e.target.value })}/>
                 </Col>
                 <Col md={1}>
                   <Form.Label>Minutes</Form.Label>
@@ -339,10 +258,9 @@ export default function QuizEditor() {
                   className="p-2 border border-2 border-gray rounded-1 d-flex"
                 >
                   <Form.Check
-                    defaultChecked={webcamRequired}
-                    onChange={(e) => setWebcamRequired(e.target.checked)}
-                    label="Webcam Required"
-                  />
+                    defaultChecked={quiz.webcamRequired || false}
+                    onChange={(e) => setQuiz({ ...quiz, webcamRequired:  e.target.checked })}
+                    label="Webcam Required"/>
                 </Col>
               </Row>
               <Row className="mb-3">
@@ -353,16 +271,15 @@ export default function QuizEditor() {
                 >
                   <Col md={6}>
                     <Form.Check
-                      defaultChecked={multipleAttempts}
-                      onChange={(e) => setMultipleAttempts(e.target.checked)}
+                      checked={quiz.hasMultipleAttempts || false}
+                      onChange={(e) => setQuiz({ ...quiz, hasMultipleAttempts: e.target.checked })}
                       label="Allow Multiple Attempts"
                     />
                   </Col>
                   <Col md={2}>
                     <Form.Control
-                      value={numberOfAttempts}
-                      onChange={(e) => setNumberOfAttempts(e.target.value)}
-                    />
+                      value={quiz.numAttempts || "1"}
+                      onChange={(e) => setQuiz({ ...quiz, numAttempts: e.target.value })}/>
                   </Col>
                   <Col md={1} />
                   <Col md={3}>
@@ -401,8 +318,8 @@ export default function QuizEditor() {
                       <Form.Control
                         id="wd-due-date"
                         type="datetime-local"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
+                        value={quiz.due}
+                        onChange={(e) => setQuiz({ ...quiz, due: e.target.value })}
                       />
                     </Col>
                   </Row>
@@ -414,8 +331,8 @@ export default function QuizEditor() {
                       <Form.Control
                         id="wd-available-from"
                         type="datetime-local"
-                        value={availableFromDate}
-                        onChange={(e) => setAvailableFromDate(e.target.value)}
+                        value={quiz.availableFrom}
+                        onChange={(e) => setQuiz({ ...quiz, availableFrom: e.target.value })}
                       />
                     </Col>
                     <Col md={6}>
@@ -425,8 +342,8 @@ export default function QuizEditor() {
                       <Form.Control
                         id="wd-available-until"
                         type="datetime-local"
-                        value={availableUntilDate}
-                        onChange={(e) => setAvailableUntilDate(e.target.value)}
+                        value={quiz.availableUntil}
+                        onChange={(e) => setQuiz({ ...quiz, availableUntil: e.target.value })}
                       />
                     </Col>
                   </Row>
@@ -460,7 +377,42 @@ export default function QuizEditor() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleSave}
+                  onClick={() => { if (editingMode) {
+                    dispatch(updateQuiz(quiz))
+                  } else {
+                    dispatch(addQuiz({
+                      _id: qid as string,
+                      course: cid as string,
+                      title: quiz.title,
+                      instructions: quiz.instructions,
+                      published: quiz.published,
+                      availableFrom: quiz.availableFromDate,
+                      availableUntil: quiz.availableUntilDate,
+                      due: quiz.dueDate,
+                      points: quiz ? quiz.points : "0",
+                      questions: [],
+                      attempts: [],
+                      quizType: quiz.quizType,
+                      assignmentGroup: quiz.assignmentGroup,
+                      shuffleAnswers: quiz.shuffleAnswers,
+                      hasTimeLimit: quiz.timeLimit,
+                      timeLimitLength: quiz.timeLimitMinutes,
+                      hasMultipleAttempts: quiz.multipleAttempts,
+                      numAttempts: quiz.numberOfAttempts,
+                      showCorrectAnswers: quiz.showCorrectAnswers,
+                      whenToShowCorrectAnswers: quiz.showCorrectAnswersDays,
+                      accessCode: quiz.accessCode,
+                      oneQuestionAtATime: quiz.oneQuestionAtATime,
+                      webcamRequired: quiz.webcamRequired,
+                      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering,
+                    }));
+                  }
+                  if (publishButtonClicked) {
+                    navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+                  } else {
+                    navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz?._id}/Details`);
+                  }
+                  }}
                   className="btn btn-danger px-3 py-2 text-white"
                 >
                   Save

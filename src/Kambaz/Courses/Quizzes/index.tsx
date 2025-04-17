@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import QuizMenu from "./Menu.tsx";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Link, useParams } from "react-router-dom";
@@ -10,13 +11,16 @@ import Button from "react-bootstrap/esm/Button";
 import { useState } from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
 import { useNavigate } from "react-router-dom";
+import { deleteQuiz } from "./reducer";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Quizzes() {
   const { cid } = useParams();
-  const quizzes = db.quizzes.filter((quiz) => quiz.course === cid);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
   const navigate = useNavigate();
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const dispatch = useDispatch();
 
   const handlePublishStatusChange = (id: string, published: boolean) => {
     const publishedStatusChange = !published;
@@ -36,10 +40,6 @@ export default function Quizzes() {
     if (value === "edit") {
       navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Details`);
     }
-    if (value === "delete") {
-      const index = db.quizzes.findIndex((quiz) => quiz._id === quizId);
-      db.quizzes.splice(index, 1);
-    }
     if (value === "publish" || value === "unpublish") {
       handlePublishStatusChange(quizId, published);
     }
@@ -47,7 +47,7 @@ export default function Quizzes() {
 
   return (
     <div id="wd-quizzes">
-      <QuizMenu />
+      <QuizMenu/>
       <ul className="list-group rounded-0" id="wd-quizzes">
         <li className="wd-quiz list-group-item p-0 mb-5 fs-5 border-gray">
           <div
@@ -60,7 +60,7 @@ export default function Quizzes() {
           </div>
           {quizzes.length > 0 && (
             <ul className="wd-quizzes list-group rounded-0" id="wd-quiz-list">
-              {quizzes.map((quiz) => (
+              {quizzes.map((quiz : any) => (
                 <li
                   key={quiz._id}
                   className="wd-quiz list-group-item p-3 ps-1 d-flex justify-content-between align-items-center"
@@ -149,7 +149,9 @@ export default function Quizzes() {
                           Select an Option
                         </option>
                         <option value="edit">Edit</option>
-                        <option value="delete">Delete</option>
+                        <option value="delete" onClick={() => dispatch(deleteQuiz(quiz._id))}> 
+                          Delete 
+                        </option>
                         <option
                           value={quiz.published ? "unpublish" : "publish"}
                         >
