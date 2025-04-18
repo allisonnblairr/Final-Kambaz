@@ -1,0 +1,156 @@
+[
+  {
+    "_id": "QUESTION101",
+    "questionType": "MULTIPLE_CHOICE",
+    "quizId": "QUIZ1",
+    "title": "CSS Flexbox Direction",
+    "content": "Which CSS property is used to specify the direction of flex items within a flex container?",
+    "points": 15,
+    "answers": [
+      "ANS101A",
+      "ANS101B",
+      "ANS101C",
+      "ANS101D"
+    ]
+  },
+  {
+    "_id": "QUESTION102",
+    "questionType": "TRUE_FALSE",
+    "quizId": "QUIZ1",
+    "title": "CSS Grid Templates",
+    "content": "In CSS Grid, the 'grid-template-columns' property can accept the 'fr' unit to define column sizes as fractions of available space.",
+    "points": 10,
+    "answers": [
+      "ANS102A",
+      "ANS102B"
+    ]
+  },
+  {
+    "_id": "QUESTION103",
+    "questionType": "FILL_BLANK",
+    "quizId": "QUIZ1",
+    "title": "CSS Flexbox Alignment",
+    "content": "To center flex items along the cross axis in a flex container, you would use the property align-items with the value ________.",
+    "points": 20,
+    "answers": [
+      "ANS103A"
+    ]
+  },
+  {
+    "_id": "QUESTION201",
+    "questionType": "MULTIPLE_CHOICE",
+    "quizId": "QUIZ2",
+    "title": "JavaScript Data Types",
+    "content": "Which of the following is NOT a primitive data type in JavaScript?",
+    "points": 15,
+    "answers": [
+      "ANS201A",
+      "ANS201B",
+      "ANS201C",
+      "ANS201D",
+      "ANS201E"
+    ]
+  },
+  {
+    "_id": "QUESTION202",
+    "questionType": "MULTIPLE_CHOICE",
+    "quizId": "QUIZ2",
+    "title": "JavaScript Scope",
+    "content": "What will be logged to the console after executing the following code?\n\nlet x = 10;\nfunction test() {\n  let x = 20;\n  console.log(x);\n}\ntest();",
+    "points": 25,
+    "answers": [
+      "ANS202A",
+      "ANS202B",
+      "ANS202C",
+      "ANS202D"
+    ]
+  },
+  {
+    "_id": "QUESTION301",
+    "questionType": "MULTIPLE_CHOICE",
+    "quizId": "QUIZ3",
+    "title": "Bootstrap Grid System",
+    "content": "In Bootstrap's grid system, which class would you use to make a column take up half the width on medium-sized screens?",
+    "points": 20,
+    "answers": [
+      "ANS301A",
+      "ANS301B",
+      "ANS301C",
+      "ANS301D"
+    ]
+  },
+  {
+    "_id": "QUESTION302",
+    "questionType": "TRUE_FALSE",
+    "quizId": "QUIZ3",
+    "title": "Bootstrap Flexbox",
+    "content": "Bootstrap 5 uses CSS Flexbox as the basis for its grid system.",
+    "points": 15,
+    "answers": [
+      "ANS302A",
+      "ANS302B"
+    ]
+  },
+  {
+    "_id": "QUESTION401",
+    "questionType": "MULTIPLE_CHOICE",
+    "quizId": "QUIZ4",
+    "title": "React Hooks",
+    "content": "Which React hook would you use to perform side effects in your component?",
+    "points": 20,
+    "answers": [
+      "ANS401A",
+      "ANS401B",
+      "ANS401C",
+      "ANS401D"
+    ]
+  },
+  {
+    "_id": "QUESTION402",
+    "questionType": "FILL_BLANK",
+    "quizId": "QUIZ4",
+    "title": "React State Updates",
+    "content": "When updating state based on the previous state value in React, you should use the ________ form of the state setter function.",
+    "points": 25,
+    "answers": [
+      "ANS402A"
+    ]
+  },
+  {
+    "_id": "QUESTION501",
+    "questionType": "MULTIPLE_CHOICE",
+    "quizId": "QUIZ5",
+    "title": "JWT Authentication",
+    "content": "In JWT (JSON Web Token) authentication, where is the most secure place to store the token on the client side?",
+    "points": 30,
+    "answers": [
+      "ANS501A",
+      "ANS501B",
+      "ANS501C",
+      "ANS501D"
+    ]
+  },
+  {
+    "_id": "QUESTION502",
+    "questionType": "TRUE_FALSE",
+    "quizId": "QUIZ5",
+    "title": "Password Storage",
+    "content": "Storing passwords as plain text in a database is a secure practice if the database has proper access controls.",
+    "points": 20,
+    "answers": [
+      "ANS502A",
+      "ANS502B"
+    ]
+  },
+  {
+    "_id": "QUESTION503",
+    "questionType": "FILL_BLANK",
+    "quizId": "QUIZ5",
+    "title": "CSRF Protection",
+    "content": "A common technique to prevent Cross-Site Request Forgery attacks is to include a ________ token in forms that is validated on submission.",
+    "points": 25,
+    "answers": [
+      "ANS503A"
+    ]
+  }
+]
