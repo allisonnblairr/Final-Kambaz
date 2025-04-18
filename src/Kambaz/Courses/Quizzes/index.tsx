@@ -8,7 +8,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { RxCircleBackslash } from "react-icons/rx";
 import { IoEllipsisVertical } from "react-icons/io5";
 import Button from "react-bootstrap/esm/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
 import { useNavigate } from "react-router-dom";
 import { deleteQuiz } from "./reducer";
@@ -16,7 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 export default function Quizzes() {
   const { cid } = useParams();
-  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [openContextMenuId, setOpenContextMenuId] = useState<string | null>(null);
   const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
   const navigate = useNavigate();
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
@@ -43,7 +43,15 @@ export default function Quizzes() {
     if (value === "publish" || value === "unpublish") {
       handlePublishStatusChange(quizId, published);
     }
+    if (value === "delete") {
+    dispatch(deleteQuiz(quizId));
+    }
   };
+
+  useEffect(() => {
+    // You can re-fetch quizzes here if needed
+    // or rely on the updated Redux state
+  }, [quizzes]);
 
   return (
     <div id="wd-quizzes">
@@ -105,7 +113,7 @@ export default function Quizzes() {
                             })
                             .replace(",", " at")
                         : ""}{" "}
-                      | {quiz.points} pts | {quiz.questions.length} questions |{" "}
+                      | {quiz.points} pts | {quiz.questions?.length > 0 ? quiz.questions.length : '0'} questions |{" "}
                       <b>Score:</b> 100
                     </div>
                   </div>
@@ -129,11 +137,13 @@ export default function Quizzes() {
                         color: "black",
                         border: "0px",
                       }}
-                      onClick={() => setContextMenuOpen(!contextMenuOpen)}
+                      onClick={() => setOpenContextMenuId(
+                        openContextMenuId === quiz._id ? null : quiz._id
+                      )}
                     >
                       <IoEllipsisVertical className="fs-5" />
                     </Button>
-                    {contextMenuOpen && (
+                    {openContextMenuId === quiz._id && (
                       <FormSelect
                         className="mt-3"
                         value={contextMenuValue}
@@ -149,9 +159,7 @@ export default function Quizzes() {
                           Select an Option
                         </option>
                         <option value="edit">Edit</option>
-                        <option value="delete" onClick={() => dispatch(deleteQuiz(quiz._id))}> 
-                          Delete 
-                        </option>
+                        <option value="delete"> Delete </option>
                         <option
                           value={quiz.published ? "unpublish" : "publish"}
                         >
@@ -169,3 +177,4 @@ export default function Quizzes() {
     </div>
   );
 }
+

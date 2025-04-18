@@ -4,15 +4,13 @@ import { FaPlus } from "react-icons/fa6";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { IoEllipsisVertical } from "react-icons/io5";
-import { v4 as uuidv4 } from "uuid";
 
 export default function QuizMenu() {
   const { cid } = useParams();
   const navigate = useNavigate();
-  const newAssignmentId = uuidv4();
 
   const handleClick = () => {
-    navigate(`/Kambaz/Courses/${cid}/Quizzes/${newAssignmentId}`);
+    navigate(`/Kambaz/Courses/${cid}/Quizzes/new`);
   };
   return (
     <Container>

@@ -11,6 +11,7 @@ import Editor from "react-simple-wysiwyg";
 import { useNavigate, useParams } from "react-router-dom";
 import { addQuiz, updateQuiz } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
@@ -101,7 +102,7 @@ export default function QuizEditor() {
           <Form>
             <Form.Group className="col-6 mb-3">
               <Form.Control
-                value={quiz?.title || "Unnamed Quiz"}
+                value={quiz.title}
                 onChange={(e) =>
                   setQuiz({ ...quiz, title: e.target.value })
                 }
@@ -377,46 +378,51 @@ export default function QuizEditor() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => { if (editingMode) {
-                    dispatch(updateQuiz(quiz))
-                  } else {
-                    dispatch(addQuiz({
-                      _id: qid as string,
-                      course: cid as string,
-                      title: quiz.title,
-                      instructions: quiz.instructions,
-                      published: quiz.published,
-                      availableFrom: quiz.availableFromDate,
-                      availableUntil: quiz.availableUntilDate,
-                      due: quiz.dueDate,
-                      points: quiz ? quiz.points : "0",
-                      questions: [],
-                      attempts: [],
+                  onClick={() => {
+                    const newQuizId = uuidv4();
+                    const finalQuiz = {
+                      ...quiz,
+                      _id: editingMode ? quiz._id : newQuizId,
+                      course: cid,
+                      title: quiz.title || "Unnamed Quiz",
+                      questions: quiz.questions || [],
+                      attempts: quiz.attempts || [],
+                      points: quiz.points || "0",
                       quizType: quiz.quizType,
-                      assignmentGroup: quiz.assignmentGroup,
-                      shuffleAnswers: quiz.shuffleAnswers,
-                      hasTimeLimit: quiz.timeLimit,
-                      timeLimitLength: quiz.timeLimitMinutes,
-                      hasMultipleAttempts: quiz.multipleAttempts,
-                      numAttempts: quiz.numberOfAttempts,
-                      showCorrectAnswers: quiz.showCorrectAnswers,
-                      whenToShowCorrectAnswers: quiz.showCorrectAnswersDays,
-                      accessCode: quiz.accessCode,
-                      oneQuestionAtATime: quiz.oneQuestionAtATime,
-                      webcamRequired: quiz.webcamRequired,
-                      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering,
-                    }));
-                  }
-                  if (publishButtonClicked) {
-                    navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-                  } else {
-                    navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz?._id}/Details`);
-                  }
+                      assignmentGroup: quiz.assignmentGroup || "QUIZZES",
+                      shuffleAnswers: quiz.shuffleAnswers ?? true,
+                      hasTimeLimit: quiz.hasTimeLimit ?? true,
+                      timeLimitLength: quiz.timeLimitLength || "20",
+                      hasMultipleAttempts: quiz.hasMultipleAttempts ?? false,
+                      numAttempts: quiz.numAttempts || "1",
+                      showCorrectAnswers: quiz.showCorrectAnswers ?? false,
+                      whenToShowCorrectAnswers: quiz.whenToShowCorrectAnswers || "",
+                      accessCode: quiz.accessCode || "",
+                      oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
+                      webcamRequired: quiz.webcamRequired ?? false,
+                      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering ?? false,
+                      availableFrom: quiz.availableFrom,
+                      availableUntil: quiz.availableUntil,
+                      due: quiz.due,
+                    };
+
+                    if (editingMode) {
+                      dispatch(updateQuiz(finalQuiz));
+                    } else {
+                      dispatch(addQuiz(finalQuiz));
+                    }
+
+                    if (publishButtonClicked) {
+                      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+                    } else {
+                      navigate(`/Kambaz/Courses/${cid}/Quizzes/${finalQuiz._id}/Details`);
+                    }
                   }}
-                  className="btn btn-danger px-3 py-2 text-white"
+                  className="btn btn-danger px-3 py-2"
                 >
                   Save
                 </Button>
+
               </Col>
             </Row>
             <hr className="mx-auto w-25" />
