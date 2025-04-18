@@ -9,6 +9,7 @@ import {BsGripVertical} from "react-icons/bs";
 import Editor from "react-simple-wysiwyg";
 import {useNavigate, useParams} from "react-router-dom";
 import * as db from "../../Database";
+import Questions from "./Questions.tsx";
 
 export default function QuizEditor() {
   const {cid, qid} = useParams();
@@ -480,26 +481,10 @@ export default function QuizEditor() {
             )
           }
         >
-          <div className="text-center">
-            <br></br>
-            <Button
-              className="btn btn-secondary px-3 py-2"
-            >
-              + New Question
-            </Button>
-            <br></br>
-            <hr></hr>
-          </div>
-          <Button
-            className="btn btn-secondary px-3 py-2 me-3"
+          <Questions
+          handleCancel={handleCancel}
           >
-            Cancel
-          </Button>
-          <Button
-            className="btn btn-danger px-3 py-2 text-white"
-          >
-            Save
-          </Button>
+          </Questions>
         </Tab>
       </Tabs>
     </div>
