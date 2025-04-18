@@ -482,7 +482,7 @@ export default function QuizEditor() {
           }
         >
           <Questions
-          handleCancel={handleCancel}
+            handleCancel={handleCancel}
           >
           </Questions>
         </Tab>
