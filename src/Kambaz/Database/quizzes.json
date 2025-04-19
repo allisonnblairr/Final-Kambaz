@@ -1,7 +1,7 @@
 [
     {
       "_id": "QUIZ1",
-      "course": "RS101", 
+      "course": "CS101", 
       "title": "React Components Quiz",
       "instructions": "Students will build and style reusable React components, focusing on props, state, and lifecycle methods.",
       "published": false,
@@ -27,7 +27,7 @@
     },
     {
       "_id": "QUIZ2",
-      "course": "RS101", 
+      "course": "CS101", 
       "title": "React MUI Icons Quiz",
       "instructions": "Students will learn how to use and style React MUI icons.",
       "published": false,

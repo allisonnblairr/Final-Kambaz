@@ -1,53 +1,59 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import QuizMenu from "./Menu.tsx";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Link, useParams } from "react-router-dom";
-import * as db from "../../Database";
 import { HiOutlineRocketLaunch } from "react-icons/hi2";
 import { FaCheckCircle } from "react-icons/fa";
 import { RxCircleBackslash } from "react-icons/rx";
 import { IoEllipsisVertical } from "react-icons/io5";
 import Button from "react-bootstrap/esm/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
 import { useNavigate } from "react-router-dom";
+import { deleteQuiz, updateQuiz } from "./reducer";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Quizzes() {
   const { cid } = useParams();
-  const quizzes = db.quizzes.filter((quiz) => quiz.course === cid);
-  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [openContextMenuId, setOpenContextMenuId] = useState<string | null>(null);
   const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
   const navigate = useNavigate();
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const handlePublishStatusChange = (id: string, published: boolean) => {
-    const publishedStatusChange = !published;
-    db.quizzes.forEach((quiz, index) => {
-      if (quiz._id === id) {
-        db.quizzes[index] = { ...quiz, published: publishedStatusChange };
-      }
-    });
+  const handlePublishStatusChange = (id: string) => {
+    const quizToUpdate = quizzes.find((q: any) => q._id === id);
+    if (quizToUpdate) {
+      const updatedQuiz = { ...quizToUpdate, published: !quizToUpdate.published };
+      dispatch(updateQuiz(updatedQuiz));
+    }
   };
 
   const handleContextMenuOptionChange = (
     quizId: string,
-    published: boolean,
     value: string
   ) => {
     setContextMenuValue(value);
     if (value === "edit") {
       navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Details`);
     }
-    if (value === "delete") {
-      const index = db.quizzes.findIndex((quiz) => quiz._id === quizId);
-      db.quizzes.splice(index, 1);
-    }
     if (value === "publish" || value === "unpublish") {
-      handlePublishStatusChange(quizId, published);
+      handlePublishStatusChange(quizId);
+    }
+    if (value === "delete") {
+    dispatch(deleteQuiz(quizId));
     }
   };
 
+  useEffect(() => {
+    // You can re-fetch quizzes here if needed
+    // or rely on the updated Redux state
+  }, [quizzes]);
+
   return (
     <div id="wd-quizzes">
-      <QuizMenu />
+      <QuizMenu/>
       <ul className="list-group rounded-0" id="wd-quizzes">
         <li className="wd-quiz list-group-item p-0 mb-5 fs-5 border-gray">
           <div
@@ -60,7 +66,7 @@ export default function Quizzes() {
           </div>
           {quizzes.length > 0 && (
             <ul className="wd-quizzes list-group rounded-0" id="wd-quiz-list">
-              {quizzes.map((quiz) => (
+              {quizzes.map((quiz : any) => (
                 <li
                   key={quiz._id}
                   className="wd-quiz list-group-item p-3 ps-1 d-flex justify-content-between align-items-center"
@@ -75,7 +81,7 @@ export default function Quizzes() {
                       style={{ marginLeft: "16px" }}
                     >
                       <Link
-                        to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}
+                        to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/details`}
                         style={{ color: "black", textDecoration: "none" }}
                       >
                         <b>{quiz.title}</b>
@@ -105,15 +111,16 @@ export default function Quizzes() {
                             })
                             .replace(",", " at")
                         : ""}{" "}
-                      | {quiz.points} pts | {quiz.questions.length} questions |{" "}
+                      | {quiz.points} pts | {quiz.questions?.length > 0 ? quiz.questions.length : '0'} questions |{" "}
                       <b>Score:</b> 100
                     </div>
                   </div>
                   <div className="float-end">
                     <Button
+                      disabled={currentUser.role === 'STUDENT'}
                       className="btn-sm bg-white border-0"
                       onClick={() =>
-                        handlePublishStatusChange(quiz._id, quiz.published)
+                        handlePublishStatusChange(quiz._id)
                       }
                     >
                       {quiz.published ? (
@@ -123,24 +130,26 @@ export default function Quizzes() {
                       )}
                     </Button>
                     <Button
+                      disabled={currentUser.role === 'STUDENT'}
                       className="btn-sm"
                       style={{
                         backgroundColor: "white",
                         color: "black",
                         border: "0px",
                       }}
-                      onClick={() => setContextMenuOpen(!contextMenuOpen)}
+                      onClick={() => setOpenContextMenuId(
+                        openContextMenuId === quiz._id ? null : quiz._id
+                      )}
                     >
                       <IoEllipsisVertical className="fs-5" />
                     </Button>
-                    {contextMenuOpen && (
+                    {openContextMenuId === quiz._id && (
                       <FormSelect
                         className="mt-3"
                         value={contextMenuValue}
                         onChange={(e) =>
                           handleContextMenuOptionChange(
                             quiz._id,
-                            quiz.published,
                             e.target.value
                           )
                         }
@@ -149,7 +158,7 @@ export default function Quizzes() {
                           Select an Option
                         </option>
                         <option value="edit">Edit</option>
-                        <option value="delete">Delete</option>
+                        <option value="delete"> Delete </option>
                         <option
                           value={quiz.published ? "unpublish" : "publish"}
                         >
@@ -167,3 +176,4 @@ export default function Quizzes() {
     </div>
   );
 }
+
