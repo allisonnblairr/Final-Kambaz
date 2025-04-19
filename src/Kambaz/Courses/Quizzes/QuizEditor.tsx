@@ -111,7 +111,7 @@ export default function QuizEditor() {
             <Form.Group className="col-10 mb-3">
               <Form.Label>Quiz Instructions:</Form.Label>
               <Editor
-                value={quiz.instructions || ""}
+                value={quiz.instructions}
                 onChange={(e) => setQuiz({ ...quiz, instructions: e.target.value })}
               />
               <Row className="mt-3">
@@ -142,13 +142,13 @@ export default function QuizEditor() {
                 </Col>
                 <Col md={4}>
                   <Form.Select
-                    value={quiz.quizType || "graded-quiz"}
+                    value={quiz.quizType}
                     onChange={(e) => setQuiz({ ...quiz, quizType: e.target.value })}
                   >
-                    <option value="graded-quiz">Graded Quiz</option>
-                    <option value="practice-quiz">Practice Quiz</option>
-                    <option value="graded-survey">Graded Survey</option>
-                    <option value="ungraded-survey">Ungraded Survey</option>
+                    <option value="Graded Quiz">Graded Quiz</option>
+                    <option value="Practice Quiz">Practice Quiz</option>
+                    <option value="Graded Survey">Graded Survey</option>
+                    <option value="Ungraded Survey">Ungraded Survey</option>
                   </Form.Select>
                 </Col>
               </Row>
@@ -158,7 +158,7 @@ export default function QuizEditor() {
                 </Col>
                 <Col md={4}>
                   <Form.Select
-                    value={quiz.assignmentGroup || "quizzes"}
+                    value={quiz.assignmentGroup}
                     onChange={(e) => setQuiz({ ...quiz, assignmentGroup: e.target.value })}
                   >
                     <option value="quizzes">QUIZZES</option>
@@ -174,7 +174,7 @@ export default function QuizEditor() {
                 </Col>
                 <Col md={4}>
                   <Form.Control
-                    value={quiz.accessCode || ""}
+                    value={quiz.accessCode}
                     onChange={(e) => setQuiz({ ...quiz, accessCode: e.target.value })}
                   />
                 </Col>
@@ -192,7 +192,7 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={5} className="d-flex">
                   <Form.Check
-                    checked={quiz.shuffleAnswers || true}
+                    checked={quiz.shuffleAnswers}
                     onChange={(e) => setQuiz({ ...quiz, shuffleAnswers: e.target.checked })}
                     label="Shuffle Answers"
                   />
@@ -202,7 +202,7 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={5} className="d-flex">
                   <Form.Check
-                    checked={quiz.oneQuestionAtATime || true}
+                    checked={quiz.oneQuestionAtATime}
                     onChange={(e) => setQuiz({ ...quiz, oneQuestionAtATime: e.target.checked })}
                     label="One Question at a Time"
                   />
@@ -212,7 +212,7 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={5} className="d-flex">
                   <Form.Check
-                    checked={quiz.lockQuestionsAfterAnswering || false}
+                    checked={quiz.lockQuestionsAfterAnswering}
                     onChange={(e) => setQuiz({ ...quiz, lockQuestionsAfterAnswering: e.target.checked })}
                     label="Lock Questions After Answering"
                   />
@@ -222,13 +222,13 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={2} className="d-flex">
                   <Form.Check
-                    checked={quiz.showCorrectAnswers || false}
+                    checked={quiz.showCorrectAnswers}
                     onChange={(e) => setQuiz({ ...quiz, showCorrectAnswers: e.target.checked })}
                     label="Show Correct Answers"/>
                 </Col>
                 <Col md={1}>
                   <Form.Control
-                    value={quiz.whenToShowCorrectAnswers || ""}
+                    value={quiz.whenToShowCorrectAnswers}
                     onChange={(e) => setQuiz({ ...quiz, showCorrectAnswersDays: e.target.value })}/>
                 </Col>
                 <Col md={2}>
@@ -239,14 +239,14 @@ export default function QuizEditor() {
                 <Col md={3} />
                 <Col md={2} className="d-flex">
                   <Form.Check
-                    checked={quiz.hasTimeLimit || true}
-                    onChange={(e) => setQuiz({ ...quiz, timeLimit: e.target.checked })}
+                    checked={quiz.hasTimeLimit}
+                    onChange={(e) => setQuiz({ ...quiz, hasTimeLimit: e.target.checked })}
                     label="Time Limit"/>
                 </Col>
                 <Col md={1}>
                   <Form.Control
-                    value={quiz.timeLimitLength || "20"}
-                    onChange={(e) => setQuiz({ ...quiz, timeLimitMinutes: e.target.value })}/>
+                    value={quiz.timeLimitLength}
+                    onChange={(e) => setQuiz({ ...quiz, timeLimitLength: e.target.value })}/>
                 </Col>
                 <Col md={1}>
                   <Form.Label>Minutes</Form.Label>
@@ -259,7 +259,7 @@ export default function QuizEditor() {
                   className="p-2 border border-2 border-gray rounded-1 d-flex"
                 >
                   <Form.Check
-                    defaultChecked={quiz.webcamRequired || false}
+                    defaultChecked={quiz.webcamRequired}
                     onChange={(e) => setQuiz({ ...quiz, webcamRequired:  e.target.checked })}
                     label="Webcam Required"/>
                 </Col>
@@ -272,14 +272,14 @@ export default function QuizEditor() {
                 >
                   <Col md={6}>
                     <Form.Check
-                      checked={quiz.hasMultipleAttempts || false}
+                      checked={quiz.hasMultipleAttempts}
                       onChange={(e) => setQuiz({ ...quiz, hasMultipleAttempts: e.target.checked })}
                       label="Allow Multiple Attempts"
                     />
                   </Col>
                   <Col md={2}>
                     <Form.Control
-                      value={quiz.numAttempts || "1"}
+                      value={quiz.numAttempts}
                       onChange={(e) => setQuiz({ ...quiz, numAttempts: e.target.value })}/>
                   </Col>
                   <Col md={1} />
@@ -385,22 +385,23 @@ export default function QuizEditor() {
                       _id: editingMode ? quiz._id : newQuizId,
                       course: cid,
                       title: quiz.title || "Unnamed Quiz",
+                      instructions: quiz.instructions,
                       questions: quiz.questions || [],
                       attempts: quiz.attempts || [],
                       points: quiz.points || "0",
                       quizType: quiz.quizType,
                       assignmentGroup: quiz.assignmentGroup || "QUIZZES",
-                      shuffleAnswers: quiz.shuffleAnswers ?? true,
-                      hasTimeLimit: quiz.hasTimeLimit ?? true,
+                      shuffleAnswers: quiz.shuffleAnswers,
+                      hasTimeLimit: quiz.hasTimeLimit,
                       timeLimitLength: quiz.timeLimitLength || "20",
-                      hasMultipleAttempts: quiz.hasMultipleAttempts ?? false,
+                      hasMultipleAttempts: quiz.hasMultipleAttempts,
                       numAttempts: quiz.numAttempts || "1",
-                      showCorrectAnswers: quiz.showCorrectAnswers ?? false,
+                      showCorrectAnswers: quiz.showCorrectAnswers,
                       whenToShowCorrectAnswers: quiz.whenToShowCorrectAnswers || "",
                       accessCode: quiz.accessCode || "",
-                      oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
-                      webcamRequired: quiz.webcamRequired ?? false,
-                      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering ?? false,
+                      oneQuestionAtATime: quiz.oneQuestionAtATime,
+                      webcamRequired: quiz.webcamRequired,
+                      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering,
                       availableFrom: quiz.availableFrom,
                       availableUntil: quiz.availableUntil,
                       due: quiz.due,

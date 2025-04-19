@@ -21,7 +21,6 @@ export default function Quizzes() {
   const navigate = useNavigate();
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const handlePublishStatusChange = (id: string, published: boolean) => {
     const publishedStatusChange = !published;
@@ -83,22 +82,12 @@ export default function Quizzes() {
                       className="quiz-details"
                       style={{ marginLeft: "16px" }}
                     >
-                      { currentUser.role === 'FACULTY' &&
-                        <Link
-                          to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}
-                          style={{ color: "black", textDecoration: "none" }}
-                        >
-                          <b>{quiz.title}</b>
-                        </Link>
-                      }
-                      { currentUser.role === 'STUDENT' &&
-                        <Link
-                          to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/details`}
-                          style={{ color: "black", textDecoration: "none" }}
-                        >
-                          <b>{quiz.title}</b>
-                        </Link>
-                      }
+                      <Link
+                        to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/details`}
+                        style={{ color: "black", textDecoration: "none" }}
+                      >
+                        <b>{quiz.title}</b>
+                      </Link>
                       <br />
                       <b>Not available until</b>{" "}
                       {quiz.availableFrom
