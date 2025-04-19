@@ -10,6 +10,7 @@ export default function QuizPreview() {
   const [quiz, setQuiz] = useState<any>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<any>({});
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const navigate = useNavigate();
@@ -146,20 +147,22 @@ export default function QuizPreview() {
         )}
       </div>
 
-      <div className="quiz-details-buttons d-flex justify-content-center my-4">
-        <Button
-          onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`)}
-          className="btn btn-primary px-3 py-2 me-2"
-          style={{
-            backgroundColor: "lightgray",
-            borderColor: "gray",
-            color: "black",
-          }}
-        >
-          <FaPencil className="me-3" />
-          Keep Editing this Quiz
-        </Button>
-      </div>
+      { currentUser.role === "FACULTY" &&
+        <div className="quiz-details-buttons d-flex justify-content-center my-4">
+          <Button
+            onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`)}
+            className="btn btn-primary px-3 py-2 me-2"
+            style={{
+              backgroundColor: "lightgray",
+              borderColor: "gray",
+              color: "black",
+            }}
+          >
+            <FaPencil className="me-3" />
+            Keep Editing this Quiz
+          </Button>
+        </div>
+      }
     </div>
   );
 }

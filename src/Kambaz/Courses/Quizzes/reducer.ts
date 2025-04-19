@@ -15,6 +15,7 @@ const quizzesSlice = createSlice({
         title: quiz.title,
         instructions: quiz.instructions,
         course: quiz.course,
+        published: quiz.published,
         availableFrom: quiz.availableFrom,
         availableUntil: quiz.availableUntil,
         due: quiz.due,

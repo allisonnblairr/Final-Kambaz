@@ -2,7 +2,6 @@
 import QuizMenu from "./Menu.tsx";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Link, useParams } from "react-router-dom";
-import * as db from "../../Database";
 import { HiOutlineRocketLaunch } from "react-icons/hi2";
 import { FaCheckCircle } from "react-icons/fa";
 import { RxCircleBackslash } from "react-icons/rx";
@@ -11,7 +10,7 @@ import Button from "react-bootstrap/esm/Button";
 import { useEffect, useState } from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
 import { useNavigate } from "react-router-dom";
-import { deleteQuiz } from "./reducer";
+import { deleteQuiz, updateQuiz } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
 
 export default function Quizzes() {
@@ -21,19 +20,18 @@ export default function Quizzes() {
   const navigate = useNavigate();
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const handlePublishStatusChange = (id: string, published: boolean) => {
-    const publishedStatusChange = !published;
-    db.quizzes.forEach((quiz, index) => {
-      if (quiz._id === id) {
-        db.quizzes[index] = { ...quiz, published: publishedStatusChange };
-      }
-    });
+  const handlePublishStatusChange = (id: string) => {
+    const quizToUpdate = quizzes.find((q: any) => q._id === id);
+    if (quizToUpdate) {
+      const updatedQuiz = { ...quizToUpdate, published: !quizToUpdate.published };
+      dispatch(updateQuiz(updatedQuiz));
+    }
   };
 
   const handleContextMenuOptionChange = (
     quizId: string,
-    published: boolean,
     value: string
   ) => {
     setContextMenuValue(value);
@@ -41,7 +39,7 @@ export default function Quizzes() {
       navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Details`);
     }
     if (value === "publish" || value === "unpublish") {
-      handlePublishStatusChange(quizId, published);
+      handlePublishStatusChange(quizId);
     }
     if (value === "delete") {
     dispatch(deleteQuiz(quizId));
@@ -119,9 +117,10 @@ export default function Quizzes() {
                   </div>
                   <div className="float-end">
                     <Button
+                      disabled={currentUser.role === 'STUDENT'}
                       className="btn-sm bg-white border-0"
                       onClick={() =>
-                        handlePublishStatusChange(quiz._id, quiz.published)
+                        handlePublishStatusChange(quiz._id)
                       }
                     >
                       {quiz.published ? (
@@ -131,6 +130,7 @@ export default function Quizzes() {
                       )}
                     </Button>
                     <Button
+                      disabled={currentUser.role === 'STUDENT'}
                       className="btn-sm"
                       style={{
                         backgroundColor: "white",
@@ -150,7 +150,6 @@ export default function Quizzes() {
                         onChange={(e) =>
                           handleContextMenuOptionChange(
                             quiz._id,
-                            quiz.published,
                             e.target.value
                           )
                         }

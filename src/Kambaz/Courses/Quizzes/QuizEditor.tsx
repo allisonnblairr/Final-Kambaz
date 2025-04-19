@@ -229,7 +229,7 @@ export default function QuizEditor() {
                 <Col md={1}>
                   <Form.Control
                     value={quiz.whenToShowCorrectAnswers}
-                    onChange={(e) => setQuiz({ ...quiz, showCorrectAnswersDays: e.target.value })}/>
+                    onChange={(e) => setQuiz({ ...quiz, whenToShowCorrectAnswers: e.target.value })}/>
                 </Col>
                 <Col md={2}>
                   <Form.Label>Days After Due Date</Form.Label>
@@ -386,6 +386,7 @@ export default function QuizEditor() {
                       course: cid,
                       title: quiz.title || "Unnamed Quiz",
                       instructions: quiz.instructions,
+                      published: quiz.published,
                       questions: quiz.questions || [],
                       attempts: quiz.attempts || [],
                       points: quiz.points || "0",
