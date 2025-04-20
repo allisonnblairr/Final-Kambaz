@@ -100,7 +100,10 @@ export default function QuizDetails() {
                 <div><strong>Points:</strong> {quiz.points}</div>
                 <div><strong>Assignment Group:</strong> {quiz.assignmentGroup || 'QUIZZES'} </div>
                 <div><strong>Shuffle Answers:</strong> {quiz.shuffleAnswers === true ? 'Yes' : 'No'}</div>
-                <div><strong>Time Limit:</strong> {quiz.timeLimitLength || '20'} Minutes</div>
+                { quiz.hasTimeLimit === true ?
+                 <div><strong>Time Limit:</strong> {quiz.timeLimitLength || '20'} Minutes</div>
+                 : <div><strong>Time Limit:</strong> None </div> 
+                }
                 <div><strong>Multiple Attempts:</strong> {quiz.hasMultipleAttempts === true ? 'Yes' : 'No'}</div>
                 <div><strong>Number of Attempts:</strong> {quiz.numAttempts || '1'}</div>
                 <div><strong>Show Correct Answers:</strong> {quiz.showCorrectAnswers === true ? 'Yes' : 'No'}</div>
