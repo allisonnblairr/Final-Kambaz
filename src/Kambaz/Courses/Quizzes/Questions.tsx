@@ -39,6 +39,7 @@ export default function Questions({handleCancel}: { handleCancel: () => void }) 
             <p>Question Content: {question.content}</p>
             <p>Points: {question.points}</p>
             <hr></hr>
+            <QuestionEditor question={question} show={show} handleClose={handleClose}/>
           </div>
         )
       )}
@@ -53,7 +54,6 @@ export default function Questions({handleCancel}: { handleCancel: () => void }) 
       >
         Save
       </Button>
-      <QuestionEditor show={show} handleClose={handleClose}/>
     </div>
   )
     ;
