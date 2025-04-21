@@ -12,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { addQuiz, updateQuiz } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
+import Questions from "./Questions.tsx";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
@@ -439,7 +440,12 @@ export default function QuizEditor() {
               <span className="text-danger">Questions</span>
             )
           }
-        ></Tab>
+        >
+          <Questions
+            handleCancel={handleCancel}
+          >
+          </Questions>
+        </Tab>
       </Tabs>
     </div>
   );
