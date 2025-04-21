@@ -1,16 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button } from "react-bootstrap";
-import * as db from "../../Database";
-import { useParams } from "react-router-dom";
+import {Button} from "react-bootstrap";
+import {useParams} from "react-router-dom";
 import QuestionEditor from "./QuestionEditor.tsx";
-import { useState } from "react";
-import { v4 as uuidv4 } from 'uuid';
+import {useState, useEffect} from "react";
+import {v4 as uuidv4} from 'uuid';
+import {useDispatch, useSelector} from "react-redux";
+import {
+  addQuestion,
+  deleteQuestion,
+  updateQuestion
+} from "./questionsreducer";
 
-export default function Questions({ handleCancel }: { handleCancel: () => void }) {
-  const { qid } = useParams();
-  const [quizquestions, setQuizquestions] = useState(
-    db.quizquestions.filter((quizquestion) => quizquestion.quizId === qid)
-  );
+export default function Questions({handleCancel}: { handleCancel: () => void }) {
+  const {qid} = useParams();
+  const dispatch = useDispatch();
+
+  const allQuizQuestions = useSelector((state: any) => state.quizQuestionsReducer.quizquestions);
+  const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (qid) {
+      const filteredQuestions = allQuizQuestions.filter(
+        (question: any) => question.quizId === qid
+      );
+      setQuizQuestions(filteredQuestions);
+    }
+  }, [qid, allQuizQuestions]);
+
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
 
   const handleShow = (questionId: string) => setEditingQuestionId(questionId);
@@ -23,59 +39,42 @@ export default function Questions({ handleCancel }: { handleCancel: () => void }
       title: "New Question",
       content: "",
       questionType: "MULTIPLE_CHOICE",
-      points: 1,
-      answers: [
-        { answerContent: "Option 1", isCorrect: false },
-        { answerContent: "Option 2", isCorrect: false },
-        { answerContent: "Option 3", isCorrect: false },
-        { answerContent: "Option 4", isCorrect: false }
-      ]
+      points: 1
     };
 
-    setQuizquestions([...quizquestions, newQuestion]);
-
-    db.quizquestions.push(newQuestion);
-
+    dispatch(addQuestion(newQuestion));
     setEditingQuestionId(newQuestion._id);
   };
 
   const handleSaveQuestion = (updatedQuestion: any) => {
-    setQuizquestions(quizquestions.map(q =>
-      q._id === updatedQuestion._id ? updatedQuestion : q
-    ));
-
-    const index = db.quizquestions.findIndex(q => q._id === updatedQuestion._id);
-    if (index !== -1) {
-      db.quizquestions[index] = updatedQuestion;
-    }
-  };
-
-  const handleSaveAll = () => {
-    console.log("All questions saved to database:", quizquestions);
+    dispatch(updateQuestion(updatedQuestion));
+    handleClose();
   };
 
   const handleDeleteQuestion = (questionId: string) => {
-    setQuizquestions(quizquestions.filter(q => q._id !== questionId));
-    const index = db.quizquestions.findIndex(q => q._id === questionId);
-    if (index !== -1) {
-      db.quizquestions.splice(index, 1);
-    }
+    dispatch(deleteQuestion(questionId));
+  };
+
+  const handleSaveAll = () => {
+    console.log("All questions saved");
+    handleCancel();
   };
 
   return (
     <div>
       <div className="text-center">
-        <br />
+        <br/>
         <Button
           className="btn btn-secondary px-3 py-2"
           onClick={handleAddNewQuestion}
         >
           + New Question
         </Button>
-        <br />
-        <hr />
+        <br/>
+        <hr/>
       </div>
-      {quizquestions?.map((question: any) => (
+
+      {quizQuestions.map((question: any) => (
         <div key={question._id}>
           <div className="d-flex justify-content-between align-items-center">
             <p>Question: {question.title}</p>
@@ -98,15 +97,18 @@ export default function Questions({ handleCancel }: { handleCancel: () => void }
           <p>Content: {question.content}</p>
           <p>Type: {question.questionType}</p>
           <p>Points: {question.points}</p>
-          <hr />
-          <QuestionEditor
-            question={question}
-            show={editingQuestionId === question._id}
-            handleClose={handleClose}
-            onSave={handleSaveQuestion}
-          />
+          <hr/>
+          {editingQuestionId === question._id && (
+            <QuestionEditor
+              question={question}
+              show={true}
+              handleClose={handleClose}
+              onSave={handleSaveQuestion}
+            />
+          )}
         </div>
       ))}
+
       <div className="mt-3">
         <Button
           className="btn btn-secondary px-3 py-2 me-3"
