@@ -17,7 +17,30 @@ import * as quizzesClient from "./client";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
-  const [quiz, setQuiz] = useState<any>({});
+  const [quiz, setQuiz] = useState<any>({
+    title: "Unnamed Quiz",
+    instructions: "",
+    published: false,
+    availableFrom: "",
+    availableUntil: "",
+    due: "",
+    points: 0,
+    questions: [],
+    attempts: [],
+    quizType: "GRADED_QUIZ",
+    assignmentGroup: "QUIZZES",
+    shuffleAnswers: true,
+    hasTimeLimit: true,
+    timeLimitLength: 20,
+    hasMultipleAttempts: false,
+    numAttempts: 1,
+    showCorrectAnswers: false,
+    whenToShowCorrectAnswers: "",
+    accessCode: "",
+    oneQuestionAtATime: true,
+    webcamRequired: false,
+    lockQuestionsAfterAnswering: false,
+  });
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,30 +60,9 @@ export default function QuizEditor() {
   const createQuiz = async () => {
     const newQuizId = uuidv4();
     const newQuiz = {
+      ...quiz,
       _id: newQuizId,
       course: cid,
-      title: quiz.title || "Unnamed Quiz",
-      instructions: quiz.instructions,
-      published: quiz.published,
-      availableFrom: quiz.availableFrom,
-      availableUntil: quiz.availableUntil,
-      due: quiz.due,
-      points: quiz.points || "0",
-      questions: quiz.questions || [],
-      attempts: quiz.attempts || [],
-      quizType: quiz.quizType,
-      assignmentGroup: quiz.assignmentGroup || "QUIZZES",
-      shuffleAnswers: quiz.shuffleAnswers,
-      hasTimeLimit: quiz.hasTimeLimit,
-      timeLimitLength: quiz.timeLimitLength || "20",
-      hasMultipleAttempts: quiz.hasMultipleAttempts,
-      numAttempts: quiz.numAttempts || "1",
-      showCorrectAnswers: quiz.showCorrectAnswers,
-      whenToShowCorrectAnswers: quiz.whenToShowCorrectAnswers || "",
-      accessCode: quiz.accessCode || "",
-      oneQuestionAtATime: quiz.oneQuestionAtATime,
-      webcamRequired: quiz.webcamRequired,
-      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering,
     };
     await coursesClient.createQuizForCourse(cid as string, newQuiz);
     dispatch(addQuiz(newQuiz));
@@ -98,7 +100,7 @@ export default function QuizEditor() {
         <Col md={8}></Col>
         <Col md={4}>
           <div>
-            Points {quiz ? quiz.points : "0"}{" "}
+            Points {quiz.points || "0"}{" "}
             <Button
               onClick={handlePublishButtonClick}
               style={{
@@ -340,7 +342,7 @@ export default function QuizEditor() {
                   className="p-2 border border-2 border-gray rounded-1 d-flex"
                 >
                   <Form.Check
-                    defaultChecked={quiz.webcamRequired}
+                    checked={quiz.webcamRequired}
                     onChange={(e) =>
                       setQuiz({ ...quiz, webcamRequired: e.target.checked })
                     }
