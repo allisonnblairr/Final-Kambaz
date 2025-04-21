@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
-import { Button, Modal, Form, Row, Col, InputGroup } from "react-bootstrap";
-import { Editor, EditorProvider } from "react-simple-wysiwyg";
+import {useState, useEffect} from "react";
+import {Button, Modal, Form, Row, Col, InputGroup} from "react-bootstrap";
+import Editor, {
+  BtnBold,
+  BtnItalic,
+  createButton,
+  EditorProvider,
+  Toolbar
+} from 'react-simple-wysiwyg';
 import MultipleChoiceEditor from "./MultipleChoiceEditor";
 import FillBlankEditor from "./FillBlankEditor";
 import TrueFalseEditor from "./TrueFalseEditor";
-
-// comments
-// i couldn't figure out why but i can't get the wysiwyg options to show, like the buttons
-// i also need to check the requirements and see if i have everything
-// the frontend styling probably still needs some work
-
 
 export default function QuestionEditor({question, show, handleClose, onSave}: {
   question: any,
@@ -25,12 +25,12 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
 
   // this all needs to be changed for the backend to be able to get the possible answers
   const [choiceInputs, setChoiceInputs] = useState([
-    { text: "", isCorrect: false },
-    { text: "", isCorrect: false },
-    { text: "", isCorrect: false },
-    { text: "", isCorrect: false }
+    {text: "", isCorrect: false},
+    {text: "", isCorrect: false},
+    {text: "", isCorrect: false},
+    {text: "", isCorrect: false}
   ]);
-  const [blankInputs, setBlanksInputs] = useState([{ answer: "", alternatives: [] }]);
+  const [blankInputs, setBlanksInputs] = useState([{answer: "", alternatives: []}]);
   const [trueFalseInput, setTrueFalseInput] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -66,13 +66,13 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
     let formattedAnswers: any[] = [];
 
     if (questionType === "MULTIPLE_CHOICE") {
-      formattedAnswers = choiceInputs.map((choice, index) => ({
+      formattedAnswers = choiceInputs.map((choice) => ({
         answerContent: choice.text,
         isCorrect: choice.isCorrect,
         questionId: question._id
       }));
     } else if (questionType === "FILL_BLANK") {
-      formattedAnswers = blankInputs.map((blank, index) => ({
+      formattedAnswers = blankInputs.map((blank) => ({
         answerContent: blank.answer,
         isCorrect: true,
         questionId: question._id
@@ -135,6 +135,8 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
     }
   };
 
+  const BtnAlignCenter = createButton('Align center', '≡', 'justifyCenter');
+
   return (
     <>
       <Modal show={show} onHide={handleClose} size="lg">
@@ -181,7 +183,13 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
                 <Editor
                   value={questionContent}
                   onChange={(e) => setQuestionContent(e.target.value)}
-                />
+                >
+                  <Toolbar>
+                    <BtnBold/>
+                    <BtnItalic/>
+                    <BtnAlignCenter/>
+                  </Toolbar>
+                </Editor>
               </EditorProvider>
             </Form.Group>
 
