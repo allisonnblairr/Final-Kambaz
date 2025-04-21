@@ -10,50 +10,63 @@ import Button from "react-bootstrap/esm/Button";
 import { useEffect, useState } from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
 import { useNavigate } from "react-router-dom";
-import { deleteQuiz, updateQuiz } from "./reducer";
+import { setQuizzes, deleteQuiz, updateQuiz } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
+import * as coursesClient from "../client";
+import * as quizzesClient from "./client";
 
 export default function Quizzes() {
   const { cid } = useParams();
-  const [openContextMenuId, setOpenContextMenuId] = useState<string | null>(null);
+  const [openContextMenuId, setOpenContextMenuId] = useState<string | null>(
+    null
+  );
   const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
   const navigate = useNavigate();
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const handlePublishStatusChange = (id: string) => {
-    const quizToUpdate = quizzes.find((q: any) => q._id === id);
-    if (quizToUpdate) {
-      const updatedQuiz = { ...quizToUpdate, published: !quizToUpdate.published };
-      dispatch(updateQuiz(updatedQuiz));
-    }
+  const fetchQuizzes = async () => {
+    const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+    dispatch(setQuizzes(quizzes));
   };
-
-  const handleContextMenuOptionChange = (
-    quizId: string,
-    value: string
-  ) => {
-    setContextMenuValue(value);
-    if (value === "edit") {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Details`);
-    }
-    if (value === "publish" || value === "unpublish") {
-      handlePublishStatusChange(quizId);
-    }
-    if (value === "delete") {
-    dispatch(deleteQuiz(quizId));
-    }
-  };
-
   useEffect(() => {
     // You can re-fetch quizzes here if needed
     // or rely on the updated Redux state
-  }, [quizzes]);
+    fetchQuizzes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cid]);
+
+  const removeQuiz = async (quizId: string) => {
+    await quizzesClient.deleteQuiz(quizId);
+    dispatch(deleteQuiz(quizId));
+  };
+
+  const updatePublishStatus = async (quiz: any) => {
+    const updatedQuiz = {
+      ...quiz,
+      published: !quiz.published,
+    };
+    await quizzesClient.updateQuiz(updatedQuiz);
+    dispatch(updateQuiz(updatedQuiz));
+  };
+
+  const handleContextMenuOptionChange = (quiz: any, newMenuOption: string) => {
+    setContextMenuValue(newMenuOption);
+    if (newMenuOption === "edit") {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/Details`);
+    }
+    if (newMenuOption === "publish" || newMenuOption === "unpublish") {
+      updatePublishStatus(quiz);
+    }
+    if (newMenuOption === "delete") {
+      removeQuiz(quiz._id);
+    }
+  };
 
   return (
     <div id="wd-quizzes">
-      <QuizMenu/>
+      <QuizMenu />
       <ul className="list-group rounded-0" id="wd-quizzes">
         <li className="wd-quiz list-group-item p-0 mb-5 fs-5 border-gray">
           <div
@@ -66,7 +79,7 @@ export default function Quizzes() {
           </div>
           {quizzes.length > 0 && (
             <ul className="wd-quizzes list-group rounded-0" id="wd-quiz-list">
-              {quizzes.map((quiz : any) => (
+              {quizzes.map((quiz: any) => (
                 <li
                   key={quiz._id}
                   className="wd-quiz list-group-item p-3 ps-1 d-flex justify-content-between align-items-center"
@@ -111,17 +124,16 @@ export default function Quizzes() {
                             })
                             .replace(",", " at")
                         : ""}{" "}
-                      | {quiz.points} pts | {quiz.questions?.length > 0 ? quiz.questions.length : '0'} questions |{" "}
-                      <b>Score:</b> 100
+                      | {quiz.points} pts |{" "}
+                      {quiz.questions?.length > 0 ? quiz.questions.length : "0"}{" "}
+                      questions | <b>Score:</b> 100
                     </div>
                   </div>
                   <div className="float-end">
                     <Button
-                      disabled={currentUser.role === 'STUDENT'}
+                      disabled={currentUser.role === "STUDENT"}
                       className="btn-sm bg-white border-0"
-                      onClick={() =>
-                        handlePublishStatusChange(quiz._id)
-                      }
+                      onClick={() => updatePublishStatus(quiz)}
                     >
                       {quiz.published ? (
                         <FaCheckCircle className="text-success fs-5" />
@@ -130,16 +142,18 @@ export default function Quizzes() {
                       )}
                     </Button>
                     <Button
-                      disabled={currentUser.role === 'STUDENT'}
+                      disabled={currentUser.role === "STUDENT"}
                       className="btn-sm"
                       style={{
                         backgroundColor: "white",
                         color: "black",
                         border: "0px",
                       }}
-                      onClick={() => setOpenContextMenuId(
-                        openContextMenuId === quiz._id ? null : quiz._id
-                      )}
+                      onClick={() =>
+                        setOpenContextMenuId(
+                          openContextMenuId === quiz._id ? null : quiz._id
+                        )
+                      }
                     >
                       <IoEllipsisVertical className="fs-5" />
                     </Button>
@@ -148,10 +162,7 @@ export default function Quizzes() {
                         className="mt-3"
                         value={contextMenuValue}
                         onChange={(e) =>
-                          handleContextMenuOptionChange(
-                            quiz._id,
-                            e.target.value
-                          )
+                          handleContextMenuOptionChange(quiz, e.target.value)
                         }
                       >
                         <option value="select-an-option">
@@ -176,4 +187,3 @@ export default function Quizzes() {
     </div>
   );
 }
-
