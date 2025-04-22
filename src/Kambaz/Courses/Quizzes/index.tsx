@@ -1,31 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import QuizMenu from "./Menu.tsx";
-import { IoMdArrowDropdown } from "react-icons/io";
-import { Link, useParams } from "react-router-dom";
-import { HiOutlineRocketLaunch } from "react-icons/hi2";
-import { FaCheckCircle } from "react-icons/fa";
-import { RxCircleBackslash } from "react-icons/rx";
-import { IoEllipsisVertical } from "react-icons/io5";
+import {IoMdArrowDropdown} from "react-icons/io";
+import {Link, useParams} from "react-router-dom";
+import {HiOutlineRocketLaunch} from "react-icons/hi2";
+import {FaCheckCircle} from "react-icons/fa";
+import {RxCircleBackslash} from "react-icons/rx";
+import {IoEllipsisVertical} from "react-icons/io5";
 import Button from "react-bootstrap/esm/Button";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
-import { useNavigate } from "react-router-dom";
-import { deleteQuiz, updateQuiz } from "./reducer";
-import { useSelector, useDispatch } from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {deleteQuiz, updateQuiz} from "./reducer";
+import {useSelector, useDispatch} from "react-redux";
 
 export default function Quizzes() {
-  const { cid } = useParams();
+  const {cid} = useParams();
   const [openContextMenuId, setOpenContextMenuId] = useState<string | null>(null);
   const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
   const navigate = useNavigate();
-  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const {quizzes} = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const {currentUser} = useSelector((state: any) => state.accountReducer);
 
   const handlePublishStatusChange = (id: string) => {
     const quizToUpdate = quizzes.find((q: any) => q._id === id);
     if (quizToUpdate) {
-      const updatedQuiz = { ...quizToUpdate, published: !quizToUpdate.published };
+      const updatedQuiz = {...quizToUpdate, published: !quizToUpdate.published};
       dispatch(updateQuiz(updatedQuiz));
     }
   };
@@ -42,7 +42,7 @@ export default function Quizzes() {
       handlePublishStatusChange(quizId);
     }
     if (value === "delete") {
-    dispatch(deleteQuiz(quizId));
+      dispatch(deleteQuiz(quizId));
     }
   };
 
@@ -58,15 +58,15 @@ export default function Quizzes() {
         <li className="wd-quiz list-group-item p-0 mb-5 fs-5 border-gray">
           <div
             className="wd-title p-3 ps-2 bg-secondary"
-            style={{ width: "auto" }}
+            style={{width: "auto"}}
           >
             <div>
-              <IoMdArrowDropdown className="me-2 fs-3" /> QUIZZES
+              <IoMdArrowDropdown className="me-2 fs-3"/> QUIZZES
             </div>
           </div>
           {quizzes.length > 0 && (
             <ul className="wd-quizzes list-group rounded-0" id="wd-quiz-list">
-              {quizzes.map((quiz : any) => (
+              {quizzes.map((quiz: any) => (
                 <li
                   key={quiz._id}
                   className="wd-quiz list-group-item p-3 ps-1 d-flex justify-content-between align-items-center"
@@ -74,45 +74,44 @@ export default function Quizzes() {
                   <div className="d-flex align-items-center">
                     <HiOutlineRocketLaunch
                       className="text-success me-2 fs-3"
-                      style={{ marginLeft: "18px" }}
+                      style={{marginLeft: "18px"}}
                     />
                     <div
                       className="quiz-details"
-                      style={{ marginLeft: "16px" }}
+                      style={{marginLeft: "16px"}}
                     >
                       <Link
                         to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/details`}
-                        style={{ color: "black", textDecoration: "none" }}
+                        style={{color: "black", textDecoration: "none"}}
                       >
                         <b>{quiz.title}</b>
                       </Link>
-                      <br />
+                      <br/>
                       <b>Not available until</b>{" "}
                       {quiz.availableFrom
                         ? new Date(quiz.availableFrom)
-                            .toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })
-                            .replace(",", " at")
+                          .toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })
+                          .replace(",", " at")
                         : ""}{" "}
                       | <b>Due</b>{" "}
                       {quiz.due
                         ? new Date(quiz.due)
-                            .toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })
-                            .replace(",", " at")
+                          .toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })
+                          .replace(",", " at")
                         : ""}{" "}
-                      | {quiz.points} pts | {quiz.questions?.length > 0 ? quiz.questions.length : '0'} questions |{" "}
-                      <b>Score:</b> 100
+                      | {quiz.points} pts | {quiz.questions?.length > 0 ? quiz.questions.length : '0'} questions
                     </div>
                   </div>
                   <div className="float-end">
@@ -124,9 +123,9 @@ export default function Quizzes() {
                       }
                     >
                       {quiz.published ? (
-                        <FaCheckCircle className="text-success fs-5" />
+                        <FaCheckCircle className="text-success fs-5"/>
                       ) : (
-                        <RxCircleBackslash className="text-danger fs-5" />
+                        <RxCircleBackslash className="text-danger fs-5"/>
                       )}
                     </Button>
                     <Button
@@ -141,7 +140,7 @@ export default function Quizzes() {
                         openContextMenuId === quiz._id ? null : quiz._id
                       )}
                     >
-                      <IoEllipsisVertical className="fs-5" />
+                      <IoEllipsisVertical className="fs-5"/>
                     </Button>
                     {openContextMenuId === quiz._id && (
                       <FormSelect
@@ -158,7 +157,7 @@ export default function Quizzes() {
                           Select an Option
                         </option>
                         <option value="edit">Edit</option>
-                        <option value="delete"> Delete </option>
+                        <option value="delete"> Delete</option>
                         <option
                           value={quiz.published ? "unpublish" : "publish"}
                         >

@@ -20,6 +20,7 @@ export default function Questions() {
   const [changedQuestions, setChangedQuestions] = useState<any[]>([]);
   const [questionToEdit, setQuestionToEdit] = useState<any>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [quizPoints, setQuizPoints] = useState(0);
 
   useEffect(() => {
     if (qid) {
@@ -29,6 +30,10 @@ export default function Questions() {
       setChangedQuestions(JSON.parse(JSON.stringify(filteredQuestions)));
     }
   }, [qid, allQuizQuestions]);
+
+  useEffect(() => {
+    calculatePoints();
+  }, [changedQuestions]);
 
   const handleOpenEditor = (question?: any) => {
     setQuestionToEdit(question || {
@@ -66,9 +71,9 @@ export default function Questions() {
   };
 
   const handleSaveAll = () => {
-    const reduxQuestions = allQuizQuestions.filter((q: any) => q.quizId === qid);
+    const questions = allQuizQuestions.filter((q: any) => q.quizId === qid);
 
-    reduxQuestions
+    questions
       .filter((reduxQ: any) => !changedQuestions.some((localQ: any) => localQ._id === reduxQ._id))
       .forEach((q: any) => dispatch(deleteQuestion(q._id)));
 
@@ -76,22 +81,30 @@ export default function Questions() {
       dispatch(addQuestion(localQ));
     });
 
+    const questionIds = changedQuestions.map(q => q._id);
+
     const currentQuiz = quizzes.find((quiz: any) => quiz._id === qid);
     if (currentQuiz) {
-      const totalPoints = changedQuestions.reduce(
-        (sum: number, q: any) => sum + (parseInt(q.points) || 0),
-        0
-      );
       dispatch(updateQuiz({
         ...currentQuiz,
-        points: totalPoints.toString()
+        points: quizPoints.toString(),
+        questions: questionIds
       }));
     }
 
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
+
   const handleCancel = () => {
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+  };
+
+  const calculatePoints = () => {
+    const totalPoints = changedQuestions.reduce(
+      (sum: number, q: any) => sum + (parseInt(q.points) || 0),
+      0
+    );
+    setQuizPoints(totalPoints);
   };
 
   return (
@@ -105,6 +118,8 @@ export default function Questions() {
           + New Question
         </Button>
         <br/>
+        <hr/>
+        <h4>Total Quiz Points: {quizPoints}</h4>
         <hr/>
       </div>
 
