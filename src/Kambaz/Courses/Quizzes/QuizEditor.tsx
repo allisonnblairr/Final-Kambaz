@@ -333,12 +333,17 @@ export default function QuizEditor() {
                   />
                 </Col>
                 <Col md={1}>
-                  <Form.Control
-                    value={quiz.timeLimitLength}
-                    onChange={(e) =>
-                      setQuiz({ ...quiz, timeLimitLength: e.target.value })
-                    }
-                  />
+                <Form.Control
+                  type="number"
+                  value={quiz.timeLimitLength === 0 ? "" : quiz.timeLimitLength}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setQuiz({
+                      ...quiz,
+                      timeLimitLength: val === "" ? 0 : parseInt(val, 10),
+                    });
+                  }}                  
+                />
                 </Col>
                 <Col md={1}>
                   <Form.Label>Minutes</Form.Label>
