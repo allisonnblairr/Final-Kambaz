@@ -94,6 +94,15 @@ export default function QuizEditor() {
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
+  const formatDateTimeLocal = (dateStr: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+  
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+  
+
   return (
     <div id="wd-quiz-editor">
       <Row>
@@ -413,7 +422,7 @@ export default function QuizEditor() {
                       <Form.Control
                         id="wd-due-date"
                         type="datetime-local"
-                        value={quiz.due}
+                        value={formatDateTimeLocal(quiz.due)}
                         onChange={(e) =>
                           setQuiz({ ...quiz, due: e.target.value })
                         }
@@ -428,7 +437,7 @@ export default function QuizEditor() {
                       <Form.Control
                         id="wd-available-from"
                         type="datetime-local"
-                        value={quiz.availableFrom}
+                        value={formatDateTimeLocal(quiz.availableFrom)}
                         onChange={(e) =>
                           setQuiz({ ...quiz, availableFrom: e.target.value })
                         }
@@ -441,7 +450,7 @@ export default function QuizEditor() {
                       <Form.Control
                         id="wd-available-until"
                         type="datetime-local"
-                        value={quiz.availableUntil}
+                        value={formatDateTimeLocal(quiz.availableUntil)}
                         onChange={(e) =>
                           setQuiz({ ...quiz, availableUntil: e.target.value })
                         }
