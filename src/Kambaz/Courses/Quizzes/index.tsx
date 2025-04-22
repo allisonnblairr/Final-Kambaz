@@ -27,7 +27,10 @@ export default function Quizzes() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const fetchQuizzes = async () => {
-    const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+    let quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+    if (currentUser.role === "STUDENT") {
+      quizzes = quizzes.filter((quiz: any) => quiz.published);
+    }
     dispatch(setQuizzes(quizzes));
   };
   useEffect(() => {
@@ -100,30 +103,56 @@ export default function Quizzes() {
                         <b>{quiz.title}</b>
                       </Link>
                       <br />
-                      <b>Not available until</b>{" "}
-                      {quiz.availableFrom
-                        ? new Date(quiz.availableFrom)
-                            .toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })
-                            .replace(",", " at")
-                        : ""}{" "}
+                      {!quiz.availableFrom && quiz.availableUntil && (
+                        <b>Available From Date TBD</b>
+                      )}{" "}
+                      {!quiz.availableUntil && quiz.availableFrom && (
+                        <b>Available Until Date TBD</b>
+                      )}{" "}
+                      {!quiz.availableFrom && !quiz.availableUntil && (
+                        <b>Available From and Available Until Dates TBD</b>
+                      )}{" "}
+                      {quiz.availableFrom &&
+                        quiz.availableUntil &&
+                        new Date() > new Date(quiz.availableUntil) && (
+                          <b>Closed</b>
+                        )}{" "}
+                      {quiz.availableFrom &&
+                        quiz.availableUntil &&
+                        new Date() >= new Date(quiz.availableFrom) &&
+                        new Date() <= new Date(quiz.availableUntil) && (
+                          <b>Available</b>
+                        )}{" "}
+                      {quiz.availableFrom &&
+                        quiz.availableUntil &&
+                        new Date() < new Date(quiz.availableFrom) && (
+                          <>
+                            <b>Not available until</b>{" "}
+                            {new Date(quiz.availableFrom)
+                              .toLocaleString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                                hour12: true,
+                              })
+                              .replace(",", "")}{" "}
+                          </>
+                        )}{" "}
                       | <b>Due</b>{" "}
                       {quiz.due
                         ? new Date(quiz.due)
                             .toLocaleString("en-US", {
                               month: "short",
                               day: "numeric",
+                              year: "numeric",
                               hour: "numeric",
                               minute: "2-digit",
                               hour12: true,
                             })
-                            .replace(",", " at")
-                        : ""}{" "}
+                            .replace(",", "")
+                        : "TBD"}{" "}
                       | {quiz.points} pts |{" "}
                       {quiz.questions?.length > 0 ? quiz.questions.length : "0"}{" "}
                       questions | <b>Score:</b> 100

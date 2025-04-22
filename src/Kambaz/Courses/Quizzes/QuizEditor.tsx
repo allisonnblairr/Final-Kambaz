@@ -200,10 +200,10 @@ export default function QuizEditor() {
                       setQuiz({ ...quiz, quizType: e.target.value })
                     }
                   >
-                    <option value="Graded Quiz">Graded Quiz</option>
-                    <option value="Practice Quiz">Practice Quiz</option>
-                    <option value="Graded Survey">Graded Survey</option>
-                    <option value="Ungraded Survey">Ungraded Survey</option>
+                    <option value="GRADED_QUIZ">Graded Quiz</option>
+                    <option value="PRACTICE_QUIZ">Practice Quiz</option>
+                    <option value="GRADED_SURVEY">Graded Survey</option>
+                    <option value="UNGRADED_SURVEY">Ungraded Survey</option>
                   </Form.Select>
                 </Col>
               </Row>
@@ -218,10 +218,10 @@ export default function QuizEditor() {
                       setQuiz({ ...quiz, assignmentGroup: e.target.value })
                     }
                   >
-                    <option value="quizzes">QUIZZES</option>
-                    <option value="exams">EXAMS</option>
-                    <option value="assignments">ASSIGNMENTS</option>
-                    <option value="projects">PROJECTS</option>
+                    <option value="QUIZZES">QUIZZES</option>
+                    <option value="EXAMS">EXAMS</option>
+                    <option value="ASSIGNMENTS">ASSIGNMENTS</option>
+                    <option value="PROJECTS">PROJECTS</option>
                   </Form.Select>
                 </Col>
               </Row>
