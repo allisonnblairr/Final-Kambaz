@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import { Button, Col, Form, Row, Tab, Tabs } from "react-bootstrap";
-import { RxCircleBackslash } from "react-icons/rx";
-import { IoEllipsisVertical } from "react-icons/io5";
-import { FaCheckCircle, FaRegKeyboard } from "react-icons/fa";
-import { FaCode } from "react-icons/fa6";
-import { RiExpandDiagonalSLine } from "react-icons/ri";
-import { BsGripVertical } from "react-icons/bs";
+import {useEffect, useState} from "react";
+import {Button, Col, Form, Row, Tab, Tabs} from "react-bootstrap";
+import {RxCircleBackslash} from "react-icons/rx";
+import {IoEllipsisVertical} from "react-icons/io5";
+import {FaCheckCircle, FaRegKeyboard} from "react-icons/fa";
+import {FaCode} from "react-icons/fa6";
+import {RiExpandDiagonalSLine} from "react-icons/ri";
+import {BsGripVertical} from "react-icons/bs";
 import Editor from "react-simple-wysiwyg";
+import Questions from "./Questions.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { addQuiz, updateQuiz } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
@@ -86,7 +87,7 @@ export default function QuizEditor() {
   };
 
   const handlePublishButtonClick = () => {
-    setQuiz({ ...quiz, published: !quiz.published });
+    setQuiz({...quiz, published: !quiz.published});
     setPublishButtonClicked(true);
   };
 
@@ -120,12 +121,12 @@ export default function QuizEditor() {
             >
               {quiz.published ? (
                 <div>
-                  <FaCheckCircle className="text-success me-1 fs-5 mb-1" />
+                  <FaCheckCircle className="text-success me-1 fs-5 mb-1"/>
                   Published
                 </div>
               ) : (
                 <div>
-                  <RxCircleBackslash className="text-danger fs-5 me-1 mb-1" />
+                  <RxCircleBackslash className="text-danger fs-5 me-1 mb-1"/>
                   Not Published
                 </div>
               )}
@@ -138,24 +139,24 @@ export default function QuizEditor() {
                 borderColor: "gray",
               }}
             >
-              <IoEllipsisVertical className="fs-5" />
+              <IoEllipsisVertical className="fs-5"/>
             </Button>
           </div>
         </Col>
       </Row>
-      <hr />
+      <hr/>
       <Tabs
         activeKey={activeKey}
         onSelect={(k) => {
           if (k !== null) setActiveKey(k);
         }}
-        style={{ width: "1100px", marginBottom: "20px" }}
+        style={{width: "1100px", marginBottom: "20px"}}
       >
         <Tab
           eventKey="details"
           title={
             activeKey === "details" ? (
-              <span style={{ color: "black" }}>Details</span>
+              <span style={{color: "black"}}>Details</span>
             ) : (
               <span className="text-danger">Details</span>
             )
@@ -165,7 +166,9 @@ export default function QuizEditor() {
             <Form.Group className="col-6 mb-3">
               <Form.Control
                 value={quiz.title}
-                onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
+                onChange={(e) =>
+                  setQuiz({...quiz, title: e.target.value})
+                }
               />
             </Form.Group>
             <Form.Group className="col-10 mb-3">
@@ -180,17 +183,17 @@ export default function QuizEditor() {
                 <Col md={8}></Col>
                 <Col md={4} className="text-end">
                   <div>
-                    <FaRegKeyboard className="fs-5 text-danger" />{" "}
-                    <span style={{ color: "black" }}>|</span>{" "}
+                    <FaRegKeyboard className="fs-5 text-danger"/>{" "}
+                    <span style={{color: "black"}}>|</span>{" "}
                     <span className="text-danger">0 words</span>{" "}
-                    <span style={{ color: "black" }}>|</span>{" "}
-                    <FaCode className="fs-5 text-danger" />{" "}
-                    <span style={{ color: "black" }}>|</span>{" "}
-                    <RiExpandDiagonalSLine className="fs-3 text-danger" />{" "}
-                    <span style={{ color: "black" }}>|</span>{" "}
+                    <span style={{color: "black"}}>|</span>{" "}
+                    <FaCode className="fs-5 text-danger"/>{" "}
+                    <span style={{color: "black"}}>|</span>{" "}
+                    <RiExpandDiagonalSLine className="fs-3 text-danger"/>{" "}
+                    <span style={{color: "black"}}>|</span>{" "}
                     <BsGripVertical
                       className="fs-5 border border-danger rounded-1"
-                      style={{ color: "black" }}
+                      style={{color: "black"}}
                     />
                   </div>
                 </Col>
@@ -257,7 +260,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col md={5} className="d-flex">
                   <Form.Check
                     checked={quiz.shuffleAnswers}
@@ -269,7 +272,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col md={5} className="d-flex">
                   <Form.Check
                     checked={quiz.oneQuestionAtATime}
@@ -281,7 +284,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col md={5} className="d-flex">
                   <Form.Check
                     checked={quiz.lockQuestionsAfterAnswering}
@@ -296,7 +299,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col md={2} className="d-flex">
                   <Form.Check
                     checked={quiz.showCorrectAnswers}
@@ -322,7 +325,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col md={2} className="d-flex">
                   <Form.Check
                     checked={quiz.hasTimeLimit}
@@ -350,7 +353,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col
                   md={7}
                   className="p-2 border border-2 border-gray rounded-1 d-flex"
@@ -365,7 +368,7 @@ export default function QuizEditor() {
                 </Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3} />
+                <Col md={3}/>
                 <Col
                   md={7}
                   className="p-3 border border-2 border-gray rounded-1 d-flex"
@@ -390,7 +393,7 @@ export default function QuizEditor() {
                       }
                     />
                   </Col>
-                  <Col md={1} />
+                  <Col md={1}/>
                   <Col md={3}>
                     <Form.Label>Number of Attempts</Form.Label>
                   </Col>
@@ -405,7 +408,7 @@ export default function QuizEditor() {
                 <Col
                   md={6}
                   className="border border-2 border-gray rounded-1"
-                  style={{ width: "600px", height: "300px" }}
+                  style={{width: "600px", height: "300px"}}
                 >
                   <Row className="mt-3 mb-3">
                     <Form.Label htmlFor="wd-assign-to">
@@ -477,7 +480,7 @@ export default function QuizEditor() {
                 + Add
               </Button>
             </Row>
-            <hr className="mx-auto w-25" />
+            <hr className="mx-auto w-25"/>
             <Row className="mt-3">
               <Col className="offset-md-5">
                 <Button
@@ -505,19 +508,21 @@ export default function QuizEditor() {
                 </Button>
               </Col>
             </Row>
-            <hr className="mx-auto w-25" />
+            <hr className="mx-auto w-25"/>
           </Form>
         </Tab>
         <Tab
           eventKey="questions"
           title={
             activeKey === "questions" ? (
-              <span style={{ color: "black" }}>Questions</span>
+              <span style={{color: "black"}}>Questions</span>
             ) : (
               <span className="text-danger">Questions</span>
             )
           }
-        ></Tab>
+        >
+          <Questions/>
+        </Tab>
       </Tabs>
     </div>
   );
