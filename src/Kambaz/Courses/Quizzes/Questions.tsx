@@ -5,11 +5,15 @@ import QuestionEditor from "./QuestionEditor.tsx";
 import {useState, useEffect} from "react";
 import {v4 as uuidv4} from 'uuid';
 import {useDispatch, useSelector} from "react-redux";
+import { updateQuiz } from "./reducer";
 import {
   addQuestion,
   deleteQuestion,
+  setQuestions,
+  updateQuestion
 } from "./questionsreducer";
-import {updateQuiz} from "./reducer";
+import * as quizzesClient from "./client";
+import * as questionsClient from "./clientQuestion.ts"
 
 export default function Questions() {
   const {cid, qid} = useParams();
@@ -22,17 +26,31 @@ export default function Questions() {
   const [showEditor, setShowEditor] = useState(false);
   const [quizPoints, setQuizPoints] = useState(0);
 
-  useEffect(() => {
-    if (qid) {
-      const filteredQuestions = allQuizQuestions.filter(
-        (question: any) => question.quizId === qid
+  const fetchQuestions = async () => {
+    const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
+  
+    for (const question of questions) {
+      const resolvedAnswers = await Promise.all(
+        question.answers.map(async (answerId : string) => {
+          const answer = await questionsClient.findPossibleAnswerForQuestionById(qid as string, answerId as string);
+          return answer;
+        })
       );
-      setChangedQuestions(JSON.parse(JSON.stringify(filteredQuestions)));
+      question.answers = resolvedAnswers;
     }
-  }, [qid, allQuizQuestions]);
+  
+    dispatch(setQuestions(questions));
+  };
+  
+
+  useEffect(() => {
+    fetchQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qid]);
 
   useEffect(() => {
     calculatePoints();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changedQuestions]);
 
   const handleOpenEditor = (question?: any) => {
@@ -40,7 +58,13 @@ export default function Questions() {
       title: "",
       content: "",
       questionType: "MULTIPLE_CHOICE",
-      points: 1
+      points: 1,
+      answers: [
+        { _id: uuidv4(), answerContent: "", isCorrect: false },
+        { _id: uuidv4(), answerContent: "", isCorrect: false },
+        { _id: uuidv4(), answerContent: "", isCorrect: false },
+        { _id: uuidv4(), answerContent: "", isCorrect: true },
+      ]
     });
     setShowEditor(true);
   };
@@ -56,10 +80,16 @@ export default function Questions() {
         prev.map(q => q._id === updatedQuestion._id ? updatedQuestion : q)
       );
     } else {
+      const tempId = uuidv4();
+      const newAnswers = (updatedQuestion.answers || []).map((a: any) => ({
+        ...a,
+        _id: uuidv4()
+      }));
       const newQuestion = {
-        _id: uuidv4(),
+        _id: tempId,
         quizId: qid,
-        ...updatedQuestion
+        ...updatedQuestion,
+        answers: newAnswers
       };
       setChangedQuestions(prev => [...prev, newQuestion]);
     }
@@ -70,25 +100,54 @@ export default function Questions() {
     setChangedQuestions(prev => prev.filter(q => q._id !== questionId));
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     const questions = allQuizQuestions.filter((q: any) => q.quizId === qid);
-
-    questions
-      .filter((reduxQ: any) => !changedQuestions.some((localQ: any) => localQ._id === reduxQ._id))
-      .forEach((q: any) => dispatch(deleteQuestion(q._id)));
-
-    changedQuestions.forEach((localQ: any) => {
-      dispatch(addQuestion(localQ));
-    });
-
-    const questionIds = changedQuestions.map(q => q._id);
-
+  
+    for (const q of questions) {
+      if (!changedQuestions.some((localQ: any) => localQ._id === q._id)) {
+        await questionsClient.deleteQuestion(q._id as string);
+        dispatch(deleteQuestion(q._id));
+      }
+    }
+  
+    const savedQuestionIds = [];
+  
+    for (const localQ of changedQuestions) {
+      const exists = allQuizQuestions.find((q: any) => q._id === localQ._id);
+      let savedQuestion: { _id: string; };
+  
+      if (!exists) {
+        const newAnswers = await Promise.all(
+          localQ.answers.map(async (answer: any) => {
+            const savedAnswer = await questionsClient.createPossibleAnswerForQuestion(savedQuestion._id, {
+              ...answer,
+              _id: uuidv4()
+            });
+            return savedAnswer._id;
+          })
+        );
+  
+        savedQuestion = await quizzesClient.createQuestionForQuiz(qid as string, { ...localQ, answers: newAnswers });
+        dispatch(addQuestion(savedQuestion));
+      } else {
+        savedQuestion = await questionsClient.updateQuestion(localQ);
+        dispatch(updateQuestion(savedQuestion));
+      }
+  
+      savedQuestionIds.push(savedQuestion._id);
+    }
+  
     const currentQuiz = quizzes.find((quiz: any) => quiz._id === qid);
     if (currentQuiz) {
+      await quizzesClient.updateQuiz({
+        ...currentQuiz,
+        points: quizPoints.toString(),
+        questions: savedQuestionIds
+      });
       dispatch(updateQuiz({
         ...currentQuiz,
         points: quizPoints.toString(),
-        questions: questionIds
+        questions: savedQuestionIds
       }));
     }
 

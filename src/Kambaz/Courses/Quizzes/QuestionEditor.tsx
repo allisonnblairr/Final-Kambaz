@@ -11,6 +11,7 @@ import Editor, {
 import MultipleChoiceEditor from "./MultipleChoiceEditor";
 import FillBlankEditor from "./FillBlankEditor";
 import TrueFalseEditor from "./TrueFalseEditor";
+import { v4 as uuidv4 } from "uuid";
 
 export default function QuestionEditor({question, show, handleClose, onSave}: {
   question: any,
@@ -56,6 +57,7 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
         }
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question]);
 
   const handleQuestionTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -67,45 +69,54 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
 
     if (questionType === "MULTIPLE_CHOICE") {
       formattedAnswers = choiceInputs.map((choice) => ({
+        _id: uuidv4(), 
         answerContent: choice.text,
         isCorrect: choice.isCorrect,
-        questionId: question._id
+        questionId: question._id,
       }));
     } else if (questionType === "FILL_BLANK") {
       formattedAnswers = blankInputs.map((blank) => ({
+        _id: uuidv4(), 
         answerContent: blank.answer,
         isCorrect: true,
-        questionId: question._id
+        questionId: question._id,
       }));
     } else if (questionType === "TRUE_FALSE") {
       formattedAnswers = [
         {
+          _id: uuidv4(), 
           answerContent: "True",
           isCorrect: trueFalseInput === true,
-          questionId: question._id
+          questionId: question._id,
         },
         {
+          _id: uuidv4(), 
           answerContent: "False",
           isCorrect: trueFalseInput === false,
-          questionId: question._id
+          questionId: question._id,
         }
       ];
     }
-
-    const updatedQuestion = {
-      ...question,
-      title: questionTitle,
-      questionType,
-      content: questionContent,
-      points,
-      answers: formattedAnswers
-    };
-
-    if (onSave) {
-      onSave(updatedQuestion);
+  
+    try {
+      const updatedQuestion = {
+        ...question,
+        title: questionTitle,
+        questionType,
+        content: questionContent,
+        points,
+        answers: formattedAnswers
+      };
+  
+      if (onSave) {
+        onSave(updatedQuestion);
+      }
+  
+      handleClose();
+    } catch (err) {
+      console.error("Error preparing question to save:", err);
     }
-    handleClose();
-  };
+  };  
 
   const renderQuestionTypeContent = () => {
     switch (questionType) {

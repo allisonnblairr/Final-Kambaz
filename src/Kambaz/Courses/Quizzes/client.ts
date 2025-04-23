@@ -19,3 +19,32 @@ export const updateQuiz = async (quiz: any) => {
   );
   return data;
 };
+export const findQuizAttemptsForQuiz = async (quizId: string) => {
+  const response = await axiosWithCredentials.get(
+    `${QUIZZES_API}/${quizId}/quizattempts`
+  );
+  return response.data;
+};
+export const createQuizAttemptForQuiz = async (
+  quizId: string,
+  quizAttempt: any
+) => {
+  const response = await axiosWithCredentials.post(
+    `${QUIZZES_API}/${quizId}/quizattempts`,
+    quizAttempt
+  );
+  return response.data;
+};
+export const findQuestionsForQuiz = async (quizId: string) => {
+  const response = await axiosWithCredentials.get(
+    `${QUIZZES_API}/${quizId}/questions`
+  );
+  return response.data;
+};
+export const createQuestionForQuiz = async (quizId: string, question: any) => {
+  const response = await axiosWithCredentials.post(
+    `${QUIZZES_API}/${quizId}/questions`,
+    question
+  );
+  return response.data;
+};
