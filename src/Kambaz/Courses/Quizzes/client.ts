@@ -89,3 +89,17 @@ export const updateQuestion = async (questionId: string, question: any) => {
   );
   return response.data;
 };
+
+export const deleteQuestion = async (questionId: string) => {
+  const response = await axiosWithCredentials.delete(
+    `${QUESTIONS_API}/${questionId}`
+  );
+  return response.data;
+};
+
+export const deletePossibleAnswer = async (answerId: string) => {
+  const response = await axiosWithCredentials.delete(
+    `${REMOTE_SERVER}/api/possibleanswers/${answerId}`
+  );
+  return response.data;
+};
