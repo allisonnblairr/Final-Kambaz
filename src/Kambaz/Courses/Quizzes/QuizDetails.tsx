@@ -4,7 +4,6 @@ import { Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { FaPencil } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import * as client from "./client";
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -13,13 +12,12 @@ export default function QuizDetails() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const navigate = useNavigate();
 
-  const fetchQuizzes = async () => {
-    let quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+  useEffect(() => {
     const foundQuiz = quizzes.find((q: any) => q._id === qid);
     if (foundQuiz) {
       setQuiz(foundQuiz);
     }
-  }
+  }, [qid, quizzes]);
 
   const reformatString = (isoString: any) => {
     if(!isoString) {
@@ -29,10 +27,6 @@ export default function QuizDetails() {
     const finalDate = `${date.toDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     return finalDate;
   }
-
-  useEffect(() => {
-    fetchQuizzes();
-    }, [qid, quizzes]);
   
   return (
     <div className="quiz-details"> 

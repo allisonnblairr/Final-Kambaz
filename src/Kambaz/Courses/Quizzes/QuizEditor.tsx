@@ -12,7 +12,6 @@ import Questions from "./Questions.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { addQuiz, updateQuiz } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
 import * as coursesClient from "../client";
 import * as quizzesClient from "./client";
 
@@ -64,7 +63,7 @@ export default function QuizEditor() {
       course: cid,
     };
     const createdQuiz = await coursesClient.createQuizForCourse(cid as string, newQuiz);
-    dispatch(addQuiz(newQuiz));
+    dispatch(addQuiz(createdQuiz));
 
     if (publishButtonClicked) {
       navigate(`/Kambaz/Courses/${cid}/Quizzes`);
@@ -519,7 +518,7 @@ export default function QuizEditor() {
             )
           }
         >
-          <Questions/>
+          <Questions quiz={quiz}/>
         </Tab>
       </Tabs>
     </div>

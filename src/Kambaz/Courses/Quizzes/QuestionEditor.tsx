@@ -57,6 +57,7 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
         }
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question]);
 
   const handleQuestionTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

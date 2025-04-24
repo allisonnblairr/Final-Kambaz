@@ -11,8 +11,9 @@ import {
   setQuestions
 } from "./questionsreducer";
 import * as client from "./client.ts";
+import * as courseClient from "../client.ts";
 
-export default function Questions() {
+export default function Questions({quiz}: {quiz: any}) {
   const { cid, qid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -85,7 +86,18 @@ export default function Questions() {
   const handleSaveAll = async () => {
     if (qid) {
       try {
-        const apiQuestions = await client.findQuestionsForQuiz(qid);
+        
+        let quizId = qid;
+        const quizExists = !!quizzes.find((quiz: any) => quiz._id === qid);
+
+        if (!quizExists) {
+          const createdQuiz = await courseClient.createQuizForCourse(cid as string, {
+            ...quiz,
+          });
+          quizId = createdQuiz._id;
+        }
+
+        const apiQuestions = await client.findQuestionsForQuiz(quizId);
 
         for (const apiQ of apiQuestions) {
           if (!questions.some((reducerQ: any) => reducerQ._id === apiQ._id)) {
@@ -99,7 +111,7 @@ export default function Questions() {
           let questionId = reducerQ._id;
 
           if (reducerQ._id.startsWith('temp_')) {
-            const newQuestion = await client.createQuestionForQuiz(qid, {
+            const newQuestion = await client.createQuestionForQuiz(quizId, {
               title: reducerQ.title,
               questionType: reducerQ.questionType,
               content: reducerQ.content,
@@ -150,16 +162,16 @@ export default function Questions() {
 
         const totalPoints = calculatePoints();
 
-        const currentQuiz = quizzes.find((quiz: any) => quiz._id === qid);
+        const currentQuiz = quizzes.find((quiz: any) => quiz._id === quizId);
         if (currentQuiz) {
           await client.updateQuiz({
             ...currentQuiz,
             points: totalPoints.toString(),
             questions: finalQuestionIds
           });
-        }
+        } 
 
-        const refreshedQuestions = await client.findQuestionsForQuiz(qid);
+        const refreshedQuestions = await client.findQuestionsForQuiz(quizId);
         dispatch(setQuestions(refreshedQuestions));
 
         navigate(`/Kambaz/Courses/${cid}/Quizzes`);
@@ -170,7 +182,7 @@ export default function Questions() {
   };
 
   const handleCancel = () => {
-    window.location.reload();
+    // window.location.reload();
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
