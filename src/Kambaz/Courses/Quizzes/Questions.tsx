@@ -108,37 +108,40 @@ export default function Questions() {
 
             questionId = newQuestion._id;
 
+            const possibleAnswers = [];
             if (reducerQ.answers && reducerQ.answers.length > 0) {
               for (const answer of reducerQ.answers) {
-                await client.createPossibleAnswer(questionId, {
+                const createdAnswer = await client.createPossibleAnswer(questionId, {
                   answerContent: answer.answerContent,
                   isCorrect: answer.isCorrect
                 });
+                possibleAnswers.push(createdAnswer._id);
               }
             }
-          } else {
 
+            await client.updateQuestion(questionId, {
+              answers: possibleAnswers
+            });
+
+          } else {
             const existingAnswers = await client.findPossibleAnswersForQuestion(questionId);
             for (const answer of existingAnswers) {
               await client.deletePossibleAnswer(answer._id);
             }
 
+            const possibleAnswers = [];
             if (reducerQ.answers && reducerQ.answers.length > 0) {
               for (const answer of reducerQ.answers) {
-                await client.createPossibleAnswer(questionId, {
+                const createdAnswer = await client.createPossibleAnswer(questionId, {
                   answerContent: answer.answerContent,
                   isCorrect: answer.isCorrect
                 });
+                possibleAnswers.push(createdAnswer._id);
               }
             }
 
-            const possibleAnswers = [];
-
             await client.updateQuestion(questionId, {
-              title: reducerQ.title,
-              questionType: reducerQ.questionType,
-              content: reducerQ.content,
-              points: reducerQ.points
+              answers: possibleAnswers
             });
           }
 

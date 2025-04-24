@@ -56,6 +56,7 @@ export const findPossibleAnswersForQuestion = async (questionId: string) => {
   const response = await axiosWithCredentials.get(
     `${QUESTIONS_API}/${questionId}/possibleanswers`
   );
+  console.log(response.data);
   return response.data;
 };
 
