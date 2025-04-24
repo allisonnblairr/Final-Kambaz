@@ -4,6 +4,7 @@ import { Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { FaPencil } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import * as client from "./client";
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -11,6 +12,14 @@ export default function QuizDetails() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const navigate = useNavigate();
+
+  const fetchQuizzes = async () => {
+    let quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+    const foundQuiz = quizzes.find((q: any) => q._id === qid);
+    if (foundQuiz) {
+      setQuiz(foundQuiz);
+    }
+  }
 
   const reformatString = (isoString: any) => {
     if(!isoString) {
@@ -22,10 +31,7 @@ export default function QuizDetails() {
   }
 
   useEffect(() => {
-      const foundQuiz = quizzes.find((q: any) => q._id === qid);
-      if (foundQuiz) {
-        setQuiz(foundQuiz);
-      }
+    fetchQuizzes();
     }, [qid, quizzes]);
   
   return (

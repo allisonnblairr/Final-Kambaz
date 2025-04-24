@@ -59,19 +59,17 @@ export default function QuizEditor() {
   const [publishButtonClicked, setPublishButtonClicked] = useState(false);
 
   const createQuiz = async () => {
-    const newQuizId = uuidv4();
     const newQuiz = {
       ...quiz,
-      _id: newQuizId,
       course: cid,
     };
-    await coursesClient.createQuizForCourse(cid as string, newQuiz);
+    const createdQuiz = await coursesClient.createQuizForCourse(cid as string, newQuiz);
     dispatch(addQuiz(newQuiz));
 
     if (publishButtonClicked) {
       navigate(`/Kambaz/Courses/${cid}/Quizzes`);
     } else {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}/Details`);
+      navigate(`/Kambaz/Courses/${cid}/Quizzes/${createdQuiz._id}/Details`);
     }
   };
 
