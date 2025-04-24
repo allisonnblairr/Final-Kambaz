@@ -11,6 +11,8 @@ import Editor, {
 import MultipleChoiceEditor from "./MultipleChoiceEditor";
 import FillBlankEditor from "./FillBlankEditor";
 import TrueFalseEditor from "./TrueFalseEditor";
+import * as client from "./client.ts";
+import {useParams} from "react-router-dom";
 
 export default function QuestionEditor({question, show, handleClose, onSave}: {
   question: any,
@@ -23,7 +25,6 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
   const [questionContent, setQuestionContent] = useState(question.content || "");
   const [points, setPoints] = useState(question.points || 1);
 
-  // this all needs to be changed for the backend to be able to get the possible answers
   const [choiceInputs, setChoiceInputs] = useState([
     {text: "", isCorrect: false},
     {text: "", isCorrect: false},
@@ -32,6 +33,7 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
   ]);
   const [blankInputs, setBlanksInputs] = useState([{answer: "", alternatives: []}]);
   const [trueFalseInput, setTrueFalseInput] = useState<boolean | null>(null);
+  const {qid} = useParams();
 
   useEffect(() => {
     if (question.answers && question.answers.length > 0) {
@@ -62,49 +64,86 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
     setQuestionType(e.target.value);
   };
 
-  const handleSave = () => {
-    let formattedAnswers: any[] = [];
+  const createPossibleAnswers = async (questionId: string) => {
+    const pAnswerIds = [];
 
     if (questionType === "MULTIPLE_CHOICE") {
-      formattedAnswers = choiceInputs.map((choice) => ({
-        answerContent: choice.text,
-        isCorrect: choice.isCorrect,
-        questionId: question._id
-      }));
-    } else if (questionType === "FILL_BLANK") {
-      formattedAnswers = blankInputs.map((blank) => ({
-        answerContent: blank.answer,
-        isCorrect: true,
-        questionId: question._id
-      }));
-    } else if (questionType === "TRUE_FALSE") {
-      formattedAnswers = [
-        {
-          answerContent: "True",
-          isCorrect: trueFalseInput === true,
-          questionId: question._id
-        },
-        {
-          answerContent: "False",
-          isCorrect: trueFalseInput === false,
-          questionId: question._id
+      for (const choice of choiceInputs) {
+        if (choice.text.trim()) {
+          const answer = await client.createPossibleAnswer(questionId, {
+            answerContent: choice.text,
+            isCorrect: choice.isCorrect
+          });
+          pAnswerIds.push(answer._id);
         }
-      ];
+      }
+    } else if (questionType === "FILL_BLANK") {
+      for (const blank of blankInputs) {
+        if (blank.answer.trim()) {
+          const answer = await client.createPossibleAnswer(questionId, {
+            answerContent: blank.answer,
+            isCorrect: true
+          });
+          pAnswerIds.push(answer._id);
+        }
+      }
+    } else if (questionType === "TRUE_FALSE") {
+      const trueAnswer = await client.createPossibleAnswer(questionId, {
+        answerContent: "True",
+        isCorrect: trueFalseInput === true
+      });
+      pAnswerIds.push(trueAnswer._id);
+
+      const falseAnswer = await client.createPossibleAnswer(questionId, {
+        answerContent: "False",
+        isCorrect: trueFalseInput === false
+      });
+      pAnswerIds.push(falseAnswer._id);
     }
 
-    const updatedQuestion = {
-      ...question,
-      title: questionTitle,
-      questionType,
-      content: questionContent,
-      points,
-      answers: formattedAnswers
-    };
+    return pAnswerIds;
+  };
 
-    if (onSave) {
-      onSave(updatedQuestion);
+  const handleSave = async () => {
+    try {
+      if (qid) {
+        let questionId = question._id;
+        let updatedQuestion;
+
+        if (!questionId) {
+          const newQuestion = await client.createQuestionForQuiz(qid, {
+            title: questionTitle,
+            questionType,
+            content: questionContent,
+            points,
+            answers: []
+          });
+          questionId = newQuestion._id;
+          updatedQuestion = newQuestion;
+        } else {
+          updatedQuestion = {
+            ...question,
+            title: questionTitle,
+            questionType,
+            content: questionContent,
+            points,
+            answers: []
+          };
+        }
+
+        const pAnswerIds = await createPossibleAnswers(questionId);
+
+        updatedQuestion.answers = pAnswerIds;
+        const savedQuestion = await client.updateQuestion(questionId, updatedQuestion);
+
+        if (onSave) {
+          onSave(savedQuestion);
+        }
+        handleClose();
+      }
+    } catch (error) {
+      console.error("Error saving question:", error);
     }
-    handleClose();
   };
 
   const renderQuestionTypeContent = () => {

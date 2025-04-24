@@ -3,13 +3,13 @@ import {Button} from "react-bootstrap";
 import {useNavigate, useParams} from "react-router-dom";
 import QuestionEditor from "./QuestionEditor.tsx";
 import {useState, useEffect} from "react";
-import {v4 as uuidv4} from 'uuid';
 import {useDispatch, useSelector} from "react-redux";
 import {
   addQuestion,
   deleteQuestion,
 } from "./questionsreducer";
 import {updateQuiz} from "./reducer";
+import * as client from "./client.ts";
 
 export default function Questions() {
   const {cid, qid} = useParams();
@@ -22,18 +22,17 @@ export default function Questions() {
   const [showEditor, setShowEditor] = useState(false);
   const [quizPoints, setQuizPoints] = useState(0);
 
-  useEffect(() => {
+  const fetchQuestions = async () => {
     if (qid) {
-      const filteredQuestions = allQuizQuestions.filter(
-        (question: any) => question.quizId === qid
-      );
-      setChangedQuestions(JSON.parse(JSON.stringify(filteredQuestions)));
+      const filteredQuestions = await client.findQuestionsForQuiz(qid);
+      setChangedQuestions(filteredQuestions);
     }
-  }, [qid, allQuizQuestions]);
+  }
 
   useEffect(() => {
+    fetchQuestions();
     calculatePoints();
-  }, [changedQuestions]);
+  }, [qid, allQuizQuestions, changedQuestions]);
 
   const handleOpenEditor = (question?: any) => {
     setQuestionToEdit(question || {
@@ -50,19 +49,10 @@ export default function Questions() {
     setQuestionToEdit(null);
   };
 
-  const handleSaveQuestion = (updatedQuestion: any) => {
-    if (updatedQuestion._id) {
-      setChangedQuestions(prev =>
-        prev.map(q => q._id === updatedQuestion._id ? updatedQuestion : q)
-      );
-    } else {
-      const newQuestion = {
-        _id: uuidv4(),
-        quizId: qid,
-        ...updatedQuestion
-      };
-      setChangedQuestions(prev => [...prev, newQuestion]);
-    }
+  const handleSaveQuestion = async (updatedQuestion: any) => {
+    setChangedQuestions(prev =>
+      prev.map(q => q._id === updatedQuestion._id ? updatedQuestion : q)
+    );
     handleCloseEditor();
   };
 
@@ -70,7 +60,7 @@ export default function Questions() {
     setChangedQuestions(prev => prev.filter(q => q._id !== questionId));
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     const questions = allQuizQuestions.filter((q: any) => q.quizId === qid);
 
     questions
@@ -90,6 +80,11 @@ export default function Questions() {
         points: quizPoints.toString(),
         questions: questionIds
       }));
+      await client.updateQuiz({
+        ...currentQuiz,
+        points: quizPoints.toString(),
+        questions: questionIds
+      });
     }
 
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
