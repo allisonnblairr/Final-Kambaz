@@ -10,6 +10,9 @@ const quizQuestionsSlice = createSlice({
   name: "quizQuestions",
   initialState,
   reducers: {
+    setQuestions: (state, { payload: questions }) => {
+      state.quizquestions = questions;
+    },
     addQuestion: (state, {payload: question}) => {
       let answers = [];
 
@@ -63,6 +66,7 @@ export const {
   addQuestion,
   deleteQuestion,
   updateQuestion,
+  setQuestions,
 } = quizQuestionsSlice.actions;
 
 export default quizQuestionsSlice.reducer;

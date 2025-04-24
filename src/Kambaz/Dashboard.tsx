@@ -12,6 +12,7 @@ export default function Dashboard(
     setEnrolling: (enrolling: boolean) => void;
     updateEnrollment: (courseId: string, enrolled: boolean) => void; })
    {
+
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   return (
@@ -42,7 +43,7 @@ export default function Dashboard(
             .map((course) => (
               <Col className="wd-dashboard-course" style={{ width: "315px" }}>
                 <Card>
-                  <Link to={`/Kambaz/Courses/${course._id}/Home`}
+                  <Link to={enrolling === false || course.enrolled === true ? `/Kambaz/Courses/${course._id}/Home` : '#'}
                     className="wd-dashboard-course-link text-decoration-none text-dark" >
                     <Card.Img src={`${course.image}`} variant="top" width="100%" height={160} />
                     <Card.Body className="card-body">

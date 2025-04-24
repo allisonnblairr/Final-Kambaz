@@ -34,8 +34,6 @@ export default function Quizzes() {
     dispatch(setQuizzes(quizzes));
   };
   useEffect(() => {
-    // You can re-fetch quizzes here if needed
-    // or rely on the updated Redux state
     fetchQuizzes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cid]);
