@@ -44,3 +44,19 @@ export const findPossibleAnswerForQuestionById = async (
   );
   return response.data;
 };
+export const findGivenAnswersForQuestion = async (questionId: string) => {
+  const response = await axiosWithCredentials.get(
+    `${QUESTIONS_API}/${questionId}/givenanswers`
+  );
+  return response.data;
+};
+export const createGivenAnswerForQuestion = async (
+  questionId: string,
+  givenAnswer: any
+) => {
+  const response = await axiosWithCredentials.post(
+    `${QUESTIONS_API}/${questionId}/givenanswers`,
+    givenAnswer
+  );
+  return response.data;
+};
