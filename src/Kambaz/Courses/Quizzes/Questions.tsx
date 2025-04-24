@@ -164,6 +164,7 @@ export default function Questions() {
   };
 
   const handleCancel = () => {
+    window.location.reload();
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
