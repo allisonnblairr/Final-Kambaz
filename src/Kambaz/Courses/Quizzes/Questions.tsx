@@ -117,12 +117,6 @@ export default function Questions() {
               }
             }
           } else {
-            await client.updateQuestion(questionId, {
-              title: reducerQ.title,
-              questionType: reducerQ.questionType,
-              content: reducerQ.content,
-              points: reducerQ.points
-            });
 
             const existingAnswers = await client.findPossibleAnswersForQuestion(questionId);
             for (const answer of existingAnswers) {
@@ -137,6 +131,15 @@ export default function Questions() {
                 });
               }
             }
+
+            const possibleAnswers = [];
+
+            await client.updateQuestion(questionId, {
+              title: reducerQ.title,
+              questionType: reducerQ.questionType,
+              content: reducerQ.content,
+              points: reducerQ.points
+            });
           }
 
           finalQuestionIds.push(questionId);
