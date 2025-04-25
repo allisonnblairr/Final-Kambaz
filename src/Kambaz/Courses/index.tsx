@@ -13,6 +13,7 @@ import Quizzes from "./Quizzes";
 import QuizEditor from "./Quizzes/QuizEditor.tsx";
 import QuizDetails from "./Quizzes/QuizDetails.tsx";
 import QuizPreview from "./Quizzes/QuizPreview.tsx";
+import QuizResults from "./Quizzes/QuizResults.tsx";
 
 export default function Courses({courses}: { courses: any[] }) {
   const {cid} = useParams();
@@ -48,6 +49,7 @@ export default function Courses({courses}: { courses: any[] }) {
             <Route path="Quizzes/:qid" element={<QuizEditor/>}/>
             <Route path="Quizzes/:qid/Details" element={<QuizDetails/>}/>
             <Route path="Quizzes/:qid/Preview" element={<QuizPreview />} />
+            <Route path="Quizzes/:qid/Results" element={<QuizResults/>}/>
             <Route path="People" element={<PeopleTable users={users}/>}/>
           </Routes>
         </div>

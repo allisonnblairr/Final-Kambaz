@@ -4,6 +4,8 @@ import { Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { FaPencil } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import * as userClient from '../../Account/client'
+import QuizResults from "./QuizResults";
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -11,6 +13,7 @@ export default function QuizDetails() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const navigate = useNavigate();
+  const [hasAttempt, setHasAttempt] = useState(false);
 
   useEffect(() => {
     const foundQuiz = quizzes.find((q: any) => q._id === qid);
@@ -31,9 +34,29 @@ export default function QuizDetails() {
     return finalDate;
   };
 
+  const fetchQuizAttempt = async () => {
+    const fetchedQuizAttempt = await userClient.findQuizAttemptForUser(currentUser._id, cid as string, qid as string);
+  
+    if (fetchedQuizAttempt && fetchedQuizAttempt.length > 0) {
+      const attempt = fetchedQuizAttempt.find((attempt: any) => attempt.userId === currentUser._id);
+      if (attempt) {
+        setHasAttempt(true);
+      } else {
+        setHasAttempt(false);
+      }
+    } else {
+      setHasAttempt(false);
+    }
+  };  
+  
+    useEffect(() => {
+      fetchQuizAttempt();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [qid, cid, currentUser._id]);
+
   return (
     <div className="quiz-details">
-      {currentUser.role === "STUDENT" && (
+      {currentUser.role === "STUDENT" && hasAttempt === false && (
         <>
           <h1> {quiz.title} </h1>
           <div
@@ -72,6 +95,10 @@ export default function QuizDetails() {
           </div>
         </>
       )}
+      { currentUser.role === "STUDENT" && hasAttempt === true && (
+        <QuizResults />
+      )
+      }
       {currentUser.role === "FACULTY" && (
         <>
           <div className="quiz-details-buttons d-flex justify-content-center my-4">

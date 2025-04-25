@@ -1,30 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import QuizMenu from "./Menu.tsx";
-import { IoMdArrowDropdown } from "react-icons/io";
-import { Link, useParams } from "react-router-dom";
-import { HiOutlineRocketLaunch } from "react-icons/hi2";
-import { FaCheckCircle } from "react-icons/fa";
-import { RxCircleBackslash } from "react-icons/rx";
-import { IoEllipsisVertical } from "react-icons/io5";
+import {IoMdArrowDropdown} from "react-icons/io";
+import {Link, useParams} from "react-router-dom";
+import {HiOutlineRocketLaunch} from "react-icons/hi2";
+import {FaCheckCircle} from "react-icons/fa";
+import {RxCircleBackslash} from "react-icons/rx";
+import {IoEllipsisVertical} from "react-icons/io5";
 import Button from "react-bootstrap/esm/Button";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import FormSelect from "react-bootstrap/esm/FormSelect";
-import { useNavigate } from "react-router-dom";
-import { setQuizzes, deleteQuiz, updateQuiz } from "./reducer";
-import { useSelector, useDispatch } from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {setQuizzes, deleteQuiz, updateQuiz} from "./reducer";
+import {useSelector, useDispatch} from "react-redux";
 import * as coursesClient from "../client";
 import * as quizzesClient from "./client";
 
 export default function Quizzes() {
-  const { cid } = useParams();
+  const {cid} = useParams();
   const [openContextMenuId, setOpenContextMenuId] = useState<string | null>(
     null
   );
   const [contextMenuValue, setContextMenuValue] = useState("select-an-option");
   const navigate = useNavigate();
-  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const {quizzes} = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const {currentUser} = useSelector((state: any) => state.accountReducer);
 
   const fetchQuizzes = async () => {
     let quizzes = await coursesClient.findQuizzesForCourse(cid as string);
@@ -43,6 +43,7 @@ export default function Quizzes() {
   const removeQuiz = async (quizId: string) => {
     await quizzesClient.deleteQuiz(quizId);
     dispatch(deleteQuiz(quizId));
+    setContextMenuValue("select-an-option");
   };
 
   const updatePublishStatus = async (quiz: any) => {
@@ -69,15 +70,15 @@ export default function Quizzes() {
 
   return (
     <div id="wd-quizzes">
-      <QuizMenu />
+      <QuizMenu/>
       <ul className="list-group rounded-0" id="wd-quizzes">
         <li className="wd-quiz list-group-item p-0 mb-5 fs-5 border-gray">
           <div
             className="wd-title p-3 ps-2 bg-secondary"
-            style={{ width: "auto" }}
+            style={{width: "auto"}}
           >
             <div>
-              <IoMdArrowDropdown className="me-2 fs-3" /> QUIZZES
+              <IoMdArrowDropdown className="me-2 fs-3"/> QUIZZES
             </div>
           </div>
           {quizzes.length > 0 && (
@@ -90,19 +91,19 @@ export default function Quizzes() {
                   <div className="d-flex align-items-center">
                     <HiOutlineRocketLaunch
                       className="text-success me-2 fs-3"
-                      style={{ marginLeft: "18px" }}
+                      style={{marginLeft: "18px"}}
                     />
                     <div
                       className="quiz-details"
-                      style={{ marginLeft: "16px" }}
+                      style={{marginLeft: "16px"}}
                     >
                       <Link
                         to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/details`}
-                        style={{ color: "black", textDecoration: "none" }}
+                        style={{color: "black", textDecoration: "none"}}
                       >
                         <b>{quiz.title}</b>
                       </Link>
-                      <br />
+                      <br/>
                       {!quiz.availableFrom && quiz.availableUntil && (
                         <b>Available From Date TBD</b>
                       )}{" "}
@@ -143,15 +144,15 @@ export default function Quizzes() {
                       | <b>Due</b>{" "}
                       {quiz.due
                         ? new Date(quiz.due)
-                            .toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })
-                            .replace(",", "")
+                          .toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })
+                          .replace(",", "")
                         : "TBD"}{" "}
                       | {quiz.points} pts |{" "}
                       {quiz.questions?.length > 0 ? quiz.questions.length : "0"}{" "}
@@ -165,9 +166,9 @@ export default function Quizzes() {
                       onClick={() => updatePublishStatus(quiz)}
                     >
                       {quiz.published ? (
-                        <FaCheckCircle className="text-success fs-5" />
+                        <FaCheckCircle className="text-success fs-5"/>
                       ) : (
-                        <RxCircleBackslash className="text-danger fs-5" />
+                        <RxCircleBackslash className="text-danger fs-5"/>
                       )}
                     </Button>
                     <Button
@@ -184,7 +185,7 @@ export default function Quizzes() {
                         )
                       }
                     >
-                      <IoEllipsisVertical className="fs-5" />
+                      <IoEllipsisVertical className="fs-5"/>
                     </Button>
                     {openContextMenuId === quiz._id && (
                       <FormSelect
