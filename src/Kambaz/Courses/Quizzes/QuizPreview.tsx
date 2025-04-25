@@ -7,6 +7,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import * as quizzesClient from "./client";
 import * as questionsClient from "./clientQuestion";
 import {addQuizAttempt} from "./quizattemptreducer";
+import {setQuizCorrectness} from "./correctnessreducer";
 
 export default function QuizPreview() {
   const {cid, qid} = useParams();
@@ -20,8 +21,6 @@ export default function QuizPreview() {
   const {quizzes} = useSelector((state: any) => state.quizzesReducer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const [displayCorrectness, setDisplayCorrectness] = useState(false);
 
   // this may change depending on logic we use for questions editor
   const fetchQuestions = async () => {
@@ -65,9 +64,7 @@ export default function QuizPreview() {
 
     checkAnswers();
 
-    // display correct answers on page for now
-    setDisplayCorrectness(true);
-//    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Details`);
+    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Results`);
   };
 
   useEffect(() => {
@@ -86,12 +83,11 @@ export default function QuizPreview() {
     (a) => a.questionId === currentQuestion._id
   );
 
-  //TODO: FIGUREOUTMOVE
-
-
-  const answerCorrectness = [];
+  const [answerCorrectness, setAnswerCorrectness] = useState<any[]>([]);
 
   const checkAnswers = async () => {
+    const newAnswerCorrectness = [];
+
     for (const question of questions) {
       let correct;
 
@@ -99,32 +95,21 @@ export default function QuizPreview() {
         const possibleAnswersForQuestions = question.answers.map((answer: any) => answer.answerContent);
         const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
 
-        // checks the first, and just the first
-        // we need to figure out how it's linked to the quiz attempt
         correct = possibleAnswersForQuestions.some((answerContent: string) =>
           answerContent.toLowerCase().trim() === givenAnswersForQuestion[0].answerContent.toLowerCase().trim());
       } else {
         const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
 
-        // same here
         const selectedPossibleAnswer = question.answers.find((answer: any) =>
           givenAnswersForQuestion[0].answerContent === answer._id);
 
         correct = selectedPossibleAnswer.isCorrect;
       }
-      answerCorrectness.push([question, correct]);
+      newAnswerCorrectness.push({...question, correct});
     }
-  }
 
-  const calculatePoints = () => {
-    let totalPoints = 0;
-    for (const answerPair of answerCorrectness) {
-      let pointsOfQuestion = answerPair[0].points;
-      if (answerPair[1] === true) {
-        totalPoints += pointsOfQuestion;
-      }
-    }
-    return totalPoints;
+    setAnswerCorrectness(newAnswerCorrectness);
+    dispatch(setQuizCorrectness(newAnswerCorrectness));
   }
 
   return (
