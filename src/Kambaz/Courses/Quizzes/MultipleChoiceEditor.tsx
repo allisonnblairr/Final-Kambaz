@@ -5,11 +5,13 @@ interface Choice {
   isCorrect: boolean;
 }
 
-export default function MultipleChoiceEditor({ choices, setChoices }:
-  {
-    choices: Choice[];
-    setChoices: (choices: Choice[]) => void;
-  }) {
+export default function MultipleChoiceEditor({
+  choices,
+  setChoices,
+}: {
+  choices: Choice[];
+  setChoices: (choices: Choice[]) => void;
+}) {
   const handleAddChoice = () => {
     setChoices([...choices, { text: "", isCorrect: false }]);
   };
@@ -27,7 +29,7 @@ export default function MultipleChoiceEditor({ choices, setChoices }:
   const handleCorrectChoiceChange = (index: number) => {
     const newChoices = choices.map((choice, i) => ({
       ...choice,
-      isCorrect: i === index
+      isCorrect: i === index,
     }));
     setChoices(newChoices);
   };

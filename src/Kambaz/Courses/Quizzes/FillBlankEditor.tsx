@@ -1,21 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {Form, Button} from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 
 interface Blank {
   answer: string;
   alternatives: string[];
 }
 
-export default function FillBlankEditor({blanks, setBlanks}:
-                                        {
-                                          blanks: Blank[];
-                                          setBlanks: any;
-                                        }) {
-  const handleAddBlank = () => {
-    setBlanks([...blanks, {answer: "", alternatives: []}]);
+export default function FillBlankEditor({
+  blanks,
+  setBlanks,
+}: {
+  blanks: Blank[];
+  setBlanks: any;
+}) {
+  const handleAddAnswer = () => {
+    setBlanks([...blanks, { answer: "", alternatives: [] }]);
   };
 
-  const handleRemoveBlank = (index: number) => {
+  const handleRemoveAnswer = (index: number) => {
     setBlanks(blanks.filter((_, i) => i !== index));
   };
 
@@ -35,13 +37,12 @@ export default function FillBlankEditor({blanks, setBlanks}:
               type="text"
               value={blank.answer}
               onChange={(e) => handleAnswerChange(index, e.target.value)}
-              placeholder={`Answer for Blank ${index + 1}`}
             />
             <Button
               variant="outline-danger"
               size="sm"
               className="ms-2"
-              onClick={() => handleRemoveBlank(index)}
+              onClick={() => handleRemoveAnswer(index)}
             >
               Remove
             </Button>
@@ -50,10 +51,10 @@ export default function FillBlankEditor({blanks, setBlanks}:
       ))}
       <Button
         variant="outline-primary"
-        onClick={handleAddBlank}
+        onClick={handleAddAnswer}
         className="mt-2"
       >
-        + Add Another Blank
+        + Add Another Answer
       </Button>
     </div>
   );

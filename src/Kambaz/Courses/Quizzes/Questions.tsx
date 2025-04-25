@@ -1,47 +1,71 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {Button} from "react-bootstrap";
-import {useNavigate, useParams} from "react-router-dom";
+import { Button } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
 import QuestionEditor from "./QuestionEditor.tsx";
-import {useState, useEffect} from "react";
-import {v4 as uuidv4} from 'uuid';
-import {useDispatch, useSelector} from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addQuestion,
+  updateQuestion,
   deleteQuestion,
+  setQuestions,
 } from "./questionsreducer";
-import {updateQuiz} from "./reducer";
+import * as client from "./client.ts";
+import * as courseClient from "../client.ts";
 
-export default function Questions() {
-  const {cid, qid} = useParams();
+export default function Questions({ quiz }: { quiz: any }) {
+  const { cid, qid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const allQuizQuestions = useSelector((state: any) => state.quizQuestionsReducer.quizquestions);
+
+  const questions = useSelector((state: any) =>
+    state.quizQuestionsReducer.quizquestions.filter(
+      (q: any) => q.quizId === qid
+    )
+  );
   const quizzes = useSelector((state: any) => state.quizzesReducer.quizzes);
-  const [changedQuestions, setChangedQuestions] = useState<any[]>([]);
+
   const [questionToEdit, setQuestionToEdit] = useState<any>(null);
   const [showEditor, setShowEditor] = useState(false);
-  const [quizPoints, setQuizPoints] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (qid) {
-      const filteredQuestions = allQuizQuestions.filter(
-        (question: any) => question.quizId === qid
-      );
-      setChangedQuestions(JSON.parse(JSON.stringify(filteredQuestions)));
-    }
-  }, [qid, allQuizQuestions]);
+    const fetchQuestions = async () => {
+      if (qid) {
+        setLoading(true);
+        try {
+          const fetchedQuestions = await client.findQuestionsForQuiz(qid);
+          dispatch(setQuestions(fetchedQuestions));
+        } catch (error) {
+          console.error("Error fetching questions:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
 
-  useEffect(() => {
-    calculatePoints();
-  }, [changedQuestions]);
+    fetchQuestions();
+  }, [qid, dispatch]);
+
+  const calculatePoints = () => {
+    const totalPoints = questions.reduce(
+      (sum: number, q: any) => sum + (parseInt(q.points) || 0),
+      0
+    );
+    return totalPoints;
+  };
 
   const handleOpenEditor = (question?: any) => {
-    setQuestionToEdit(question || {
-      title: "",
-      content: "",
-      questionType: "MULTIPLE_CHOICE",
-      points: 1
-    });
+    setQuestionToEdit(
+      question || {
+        _id: `temp_${Date.now()}`,
+        title: "",
+        content: "",
+        questionType: "MULTIPLE_CHOICE",
+        points: 1,
+        quizId: qid,
+      }
+    );
     setShowEditor(true);
   };
 
@@ -51,76 +75,148 @@ export default function Questions() {
   };
 
   const handleSaveQuestion = (updatedQuestion: any) => {
-    if (updatedQuestion._id) {
-      setChangedQuestions(prev =>
-        prev.map(q => q._id === updatedQuestion._id ? updatedQuestion : q)
-      );
+    if (questions.some((q: any) => q._id === updatedQuestion._id)) {
+      dispatch(updateQuestion(updatedQuestion));
     } else {
-      const newQuestion = {
-        _id: uuidv4(),
-        quizId: qid,
-        ...updatedQuestion
-      };
-      setChangedQuestions(prev => [...prev, newQuestion]);
+      dispatch(addQuestion(updatedQuestion));
     }
     handleCloseEditor();
   };
 
   const handleDeleteQuestion = (questionId: string) => {
-    setChangedQuestions(prev => prev.filter(q => q._id !== questionId));
+    dispatch(deleteQuestion(questionId));
   };
 
-  const handleSaveAll = () => {
-    const questions = allQuizQuestions.filter((q: any) => q.quizId === qid);
+  const handleSaveAll = async () => {
+    if (qid) {
+      try {
+        let quizId = qid;
+        const quizExists = !!quizzes.find((quiz: any) => quiz._id === qid);
 
-    questions
-      .filter((reduxQ: any) => !changedQuestions.some((localQ: any) => localQ._id === reduxQ._id))
-      .forEach((q: any) => dispatch(deleteQuestion(q._id)));
+        if (!quizExists) {
+          const createdQuiz = await courseClient.createQuizForCourse(
+            cid as string,
+            {
+              ...quiz,
+            }
+          );
+          quizId = createdQuiz._id;
+        }
 
-    changedQuestions.forEach((localQ: any) => {
-      dispatch(addQuestion(localQ));
-    });
+        const apiQuestions = await client.findQuestionsForQuiz(quizId);
 
-    const questionIds = changedQuestions.map(q => q._id);
+        for (const apiQ of apiQuestions) {
+          if (!questions.some((reducerQ: any) => reducerQ._id === apiQ._id)) {
+            await client.deleteQuestion(apiQ._id);
+          }
+        }
 
-    const currentQuiz = quizzes.find((quiz: any) => quiz._id === qid);
-    if (currentQuiz) {
-      dispatch(updateQuiz({
-        ...currentQuiz,
-        points: quizPoints.toString(),
-        questions: questionIds
-      }));
+        const finalQuestionIds = [];
+
+        for (const reducerQ of questions) {
+          let questionId = reducerQ._id;
+
+          if (reducerQ._id.startsWith("temp_")) {
+            const newQuestion = await client.createQuestionForQuiz(quizId, {
+              title: reducerQ.title,
+              questionType: reducerQ.questionType,
+              content: reducerQ.content,
+              points: reducerQ.points,
+            });
+
+            questionId = newQuestion._id;
+
+            const possibleAnswers = [];
+            if (reducerQ.answers && reducerQ.answers.length > 0) {
+              for (const answer of reducerQ.answers) {
+                const createdAnswer = await client.createPossibleAnswer(
+                  questionId,
+                  {
+                    answerContent: answer.answerContent,
+                    isCorrect: answer.isCorrect,
+                  }
+                );
+                possibleAnswers.push(createdAnswer._id);
+              }
+            }
+
+            await client.updateQuestion(questionId, {
+              answers: possibleAnswers,
+            });
+          } else {
+            const existingAnswers = await client.findPossibleAnswersForQuestion(
+              questionId
+            );
+            for (const answer of existingAnswers) {
+              await client.deletePossibleAnswer(answer._id);
+            }
+
+            const possibleAnswers = [];
+            if (reducerQ.answers && reducerQ.answers.length > 0) {
+              for (const answer of reducerQ.answers) {
+                const createdAnswer = await client.createPossibleAnswer(
+                  questionId,
+                  {
+                    answerContent: answer.answerContent,
+                    isCorrect: answer.isCorrect,
+                  }
+                );
+                possibleAnswers.push(createdAnswer._id);
+              }
+            }
+
+            await client.updateQuestion(questionId, {
+              answers: possibleAnswers,
+            });
+          }
+
+          finalQuestionIds.push(questionId);
+        }
+
+        const totalPoints = calculatePoints();
+
+        const currentQuiz = quizzes.find((quiz: any) => quiz._id === quizId);
+        if (currentQuiz) {
+          await client.updateQuiz({
+            ...currentQuiz,
+            points: totalPoints.toString(),
+            questions: finalQuestionIds,
+          });
+        }
+
+        const refreshedQuestions = await client.findQuestionsForQuiz(quizId);
+        dispatch(setQuestions(refreshedQuestions));
+
+        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+      } catch (error) {
+        console.error("Error in handleSaveAll:", error);
+      }
     }
-
-    navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
   const handleCancel = () => {
+    // window.location.reload();
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
-  const calculatePoints = () => {
-    const totalPoints = changedQuestions.reduce(
-      (sum: number, q: any) => sum + (parseInt(q.points) || 0),
-      0
-    );
-    setQuizPoints(totalPoints);
-  };
+  if (loading) {
+    return <div>Loading questions...</div>;
+  }
 
   return (
     <div>
       <div className="text-center">
-        <br/>
+        <br />
         <Button
           className="btn btn-secondary px-3 py-2"
           onClick={() => handleOpenEditor()}
         >
           + New Question
         </Button>
-        <br/>
-        <hr/>
-        <h4>Total Quiz Points: {quizPoints}</h4>
-        <hr/>
+        <br />
+        <hr />
+        <h4>Total Quiz Points: {calculatePoints()}</h4>
+        <hr />
       </div>
 
       {showEditor && (
@@ -132,7 +228,7 @@ export default function Questions() {
         />
       )}
 
-      {changedQuestions.map((question: any) => (
+      {questions.map((question: any) => (
         <div key={question._id}>
           <div className="d-flex justify-content-between align-items-center">
             <p>Question: {question.title}</p>
@@ -155,7 +251,7 @@ export default function Questions() {
           <p>Content: {question.content}</p>
           <p>Type: {question.questionType}</p>
           <p>Points: {question.points}</p>
-          <hr/>
+          <hr />
         </div>
       ))}
 

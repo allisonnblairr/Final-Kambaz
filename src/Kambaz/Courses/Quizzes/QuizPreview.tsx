@@ -49,7 +49,12 @@ export default function QuizPreview() {
     { _id: "a1", answerContent: "MongoDB", questionId: "q1", isCorrect: true },
     { _id: "a2", answerContent: "React", questionId: "q1", isCorrect: false },
     { _id: "a3", answerContent: "NodeJs", questionId: "q1", isCorrect: false },
-    { _id: "a4", answerContent: "TypeScript", questionId: "q1", isCorrect: false },
+    {
+      _id: "a4",
+      answerContent: "TypeScript",
+      questionId: "q1",
+      isCorrect: false,
+    },
     { _id: "a5", answerContent: "True", questionId: "q2", isCorrect: false },
     { _id: "a6", answerContent: "False", questionId: "q2", isCorrect: true },
     { _id: "a7", answerContent: "client", questionId: "q3", isCorrect: true },
@@ -86,11 +91,11 @@ export default function QuizPreview() {
             borderRadius: "8px",
           }}
         >
-            <div className='d-flex justify-content-between mb-4'>
-                <h4> Question {currentIndex + 1}</h4>
-                <h5> {currentQuestion.points} points</h5>
-            </div>
-            <hr></hr>
+          <div className="d-flex justify-content-between mb-4">
+            <h4> Question {currentIndex + 1}</h4>
+            <h5> {currentQuestion.points} points</h5>
+          </div>
+          <hr></hr>
           <h5>{currentQuestion.title}</h5>
           <p>{currentQuestion.content}</p>
           {currentQuestion.questionType === "FILL_BLANK" ? (
@@ -119,9 +124,7 @@ export default function QuizPreview() {
       <div className="d-flex justify-content-center mb-4 gap-2">
         <Button
           className="btn btn-primary"
-          onClick={() =>
-            setCurrentIndex((prev) => Math.max(prev - 1, 0))
-          }
+          onClick={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
           disabled={currentIndex === 0}
           style={{
             backgroundColor: "lightgray",
@@ -132,22 +135,23 @@ export default function QuizPreview() {
           Back
         </Button>
         {currentIndex < questions.length - 1 ? (
-          <Button className="btn btn-primary" onClick={() => setCurrentIndex((prev) => prev + 1)}
-          style={{
-            backgroundColor: "lightgray",
-            borderColor: "gray",
-            color: "black",
-          }}>
+          <Button
+            className="btn btn-primary"
+            onClick={() => setCurrentIndex((prev) => prev + 1)}
+            style={{
+              backgroundColor: "lightgray",
+              borderColor: "gray",
+              color: "black",
+            }}
+          >
             Next
           </Button>
         ) : (
-          <Button className="btn btn-danger">
-            Submit Quiz
-          </Button>
+          <Button className="btn btn-danger">Submit Quiz</Button>
         )}
       </div>
 
-      { currentUser.role === "FACULTY" &&
+      {currentUser.role === "FACULTY" && (
         <div className="quiz-details-buttons d-flex justify-content-center my-4">
           <Button
             onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`)}
@@ -162,7 +166,7 @@ export default function QuizPreview() {
             Keep Editing this Quiz
           </Button>
         </div>
-      }
+      )}
     </div>
   );
 }

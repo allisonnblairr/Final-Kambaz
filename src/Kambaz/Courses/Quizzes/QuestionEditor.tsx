@@ -1,44 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useState, useEffect} from "react";
-import {Button, Modal, Form, Row, Col, InputGroup} from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { Button, Modal, Form, Row, Col, InputGroup } from "react-bootstrap";
 import Editor, {
   BtnBold,
   BtnItalic,
   createButton,
   EditorProvider,
-  Toolbar
-} from 'react-simple-wysiwyg';
+  Toolbar,
+} from "react-simple-wysiwyg";
 import MultipleChoiceEditor from "./MultipleChoiceEditor";
 import FillBlankEditor from "./FillBlankEditor";
 import TrueFalseEditor from "./TrueFalseEditor";
+import { useParams } from "react-router-dom";
 
-export default function QuestionEditor({question, show, handleClose, onSave}: {
-  question: any,
-  show: boolean,
-  handleClose: () => void,
-  onSave?: (updatedQuestion: any) => void
+export default function QuestionEditor({
+  question,
+  show,
+  handleClose,
+  onSave,
+}: {
+  question: any;
+  show: boolean;
+  handleClose: () => void;
+  onSave?: (updatedQuestion: any) => void;
 }) {
   const [questionTitle, setQuestionTitle] = useState(question.title || "");
-  const [questionType, setQuestionType] = useState(question.questionType || "MULTIPLE_CHOICE");
-  const [questionContent, setQuestionContent] = useState(question.content || "");
+  const [questionType, setQuestionType] = useState(
+    question.questionType || "MULTIPLE_CHOICE"
+  );
+  const [questionContent, setQuestionContent] = useState(
+    question.content || ""
+  );
   const [points, setPoints] = useState(question.points || 1);
 
-  // this all needs to be changed for the backend to be able to get the possible answers
   const [choiceInputs, setChoiceInputs] = useState([
-    {text: "", isCorrect: false},
-    {text: "", isCorrect: false},
-    {text: "", isCorrect: false},
-    {text: "", isCorrect: false}
+    { text: "", isCorrect: false },
+    { text: "", isCorrect: false },
+    { text: "", isCorrect: false },
+    { text: "", isCorrect: false },
   ]);
-  const [blankInputs, setBlanksInputs] = useState([{answer: "", alternatives: []}]);
+  const [blankInputs, setBlanksInputs] = useState([
+    { answer: "", alternatives: [] },
+  ]);
   const [trueFalseInput, setTrueFalseInput] = useState<boolean | null>(null);
+  const { qid } = useParams();
 
   useEffect(() => {
     if (question.answers && question.answers.length > 0) {
       if (question.questionType === "MULTIPLE_CHOICE") {
         const choices = question.answers.map((answer: any) => ({
           text: answer.answerContent,
-          isCorrect: answer.isCorrect
+          isCorrect: answer.isCorrect,
         }));
         setChoiceInputs(choices.length > 0 ? choices : choiceInputs);
       } else if (question.questionType === "FILL_BLANK") {
@@ -46,65 +58,74 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
           .filter((answer: any) => answer.isCorrect)
           .map((answer: any) => ({
             answer: answer.answerContent,
-            alternatives: []
+            alternatives: [],
           }));
         setBlanksInputs(blanks.length > 0 ? blanks : blankInputs);
       } else if (question.questionType === "TRUE_FALSE") {
-        const correctAnswer = question.answers.find((answer: any) => answer.isCorrect);
+        const correctAnswer = question.answers.find(
+          (answer: any) => answer.isCorrect
+        );
         if (correctAnswer) {
-          setTrueFalseInput(correctAnswer.answerContent.toLowerCase() === "true");
+          setTrueFalseInput(
+            correctAnswer.answerContent.toLowerCase() === "true"
+          );
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question]);
 
-  const handleQuestionTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleQuestionTypeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setQuestionType(e.target.value);
   };
 
   const handleSave = () => {
-    let formattedAnswers: any[] = [];
+    try {
+      const questionData = {
+        ...question,
+        title: questionTitle,
+        questionType,
+        content: questionContent,
+        points,
+        quizId: qid,
+      };
 
-    if (questionType === "MULTIPLE_CHOICE") {
-      formattedAnswers = choiceInputs.map((choice) => ({
-        answerContent: choice.text,
-        isCorrect: choice.isCorrect,
-        questionId: question._id
-      }));
-    } else if (questionType === "FILL_BLANK") {
-      formattedAnswers = blankInputs.map((blank) => ({
-        answerContent: blank.answer,
-        isCorrect: true,
-        questionId: question._id
-      }));
-    } else if (questionType === "TRUE_FALSE") {
-      formattedAnswers = [
-        {
-          answerContent: "True",
-          isCorrect: trueFalseInput === true,
-          questionId: question._id
-        },
-        {
-          answerContent: "False",
-          isCorrect: trueFalseInput === false,
-          questionId: question._id
-        }
-      ];
+      if (questionType === "MULTIPLE_CHOICE") {
+        questionData.answers = choiceInputs
+          .filter((choice) => choice.text.trim())
+          .map((choice) => ({
+            answerContent: choice.text,
+            isCorrect: choice.isCorrect,
+          }));
+      } else if (questionType === "FILL_BLANK") {
+        questionData.answers = blankInputs
+          .filter((blank) => blank.answer.trim())
+          .map((blank) => ({
+            answerContent: blank.answer,
+            isCorrect: true,
+          }));
+      } else if (questionType === "TRUE_FALSE") {
+        questionData.answers = [
+          {
+            answerContent: "True",
+            isCorrect: trueFalseInput === true,
+          },
+          {
+            answerContent: "False",
+            isCorrect: trueFalseInput === false,
+          },
+        ];
+      }
+
+      if (onSave) {
+        onSave(questionData);
+      }
+      handleClose();
+    } catch (error) {
+      console.error("Error creating question:", error);
     }
-
-    const updatedQuestion = {
-      ...question,
-      title: questionTitle,
-      questionType,
-      content: questionContent,
-      points,
-      answers: formattedAnswers
-    };
-
-    if (onSave) {
-      onSave(updatedQuestion);
-    }
-    handleClose();
   };
 
   const renderQuestionTypeContent = () => {
@@ -118,10 +139,7 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
         );
       case "FILL_BLANK":
         return (
-          <FillBlankEditor
-            blanks={blankInputs}
-            setBlanks={setBlanksInputs}
-          />
+          <FillBlankEditor blanks={blankInputs} setBlanks={setBlanksInputs} />
         );
       case "TRUE_FALSE":
         return (
@@ -135,7 +153,7 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
     }
   };
 
-  const BtnAlignCenter = createButton('Align center', '≡', 'justifyCenter');
+  const BtnAlignCenter = createButton("Align center", "≡", "justifyCenter");
 
   return (
     <>
@@ -185,9 +203,9 @@ export default function QuestionEditor({question, show, handleClose, onSave}: {
                   onChange={(e) => setQuestionContent(e.target.value)}
                 >
                   <Toolbar>
-                    <BtnBold/>
-                    <BtnItalic/>
-                    <BtnAlignCenter/>
+                    <BtnBold />
+                    <BtnItalic />
+                    <BtnAlignCenter />
                   </Toolbar>
                 </Editor>
               </EditorProvider>
