@@ -35,6 +35,46 @@ export default function QuizPreview() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qid]);
 
+  useEffect(() => {
+    const foundQuiz = quizzes.find((q: any) => q._id === qid);
+    if (foundQuiz) setQuiz(foundQuiz);
+  }, [qid, quizzes]);
+
+  const handleAnswerChange = (questionId: string, answer: string) => {
+    setUserAnswers({...userAnswers, [questionId]: answer});
+  };
+
+  const currentQuestion = questions[currentIndex];
+  if (!currentQuestion) return null;
+
+  const currentAnswers = possibleAnswers.filter(
+    (a) => a.questionId === currentQuestion._id
+  );
+
+  let answerCorrectness = [];
+
+  const checkAnswers = async () => {
+    for (const question of questions) {
+      let correct;
+
+      if (question.questionType === "FILL_BLANK") {
+        const possibleAnswersForQuestions = question.answers.map((answer: any) => answer.answerContent);
+        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
+
+        correct = possibleAnswersForQuestions.some((answerContent: string) =>
+          answerContent.toLowerCase().trim() === givenAnswersForQuestion[0].answerContent.toLowerCase().trim());
+      } else {
+        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
+
+        const selectedPossibleAnswer = question.answers.find((answer: any) =>
+          givenAnswersForQuestion[0].answerContent === answer._id);
+
+        correct = selectedPossibleAnswer.isCorrect;
+      }
+      answerCorrectness.push({...question, correct});
+    }
+  }
+
   const saveQuizAttempt = async () => {
     const givenAnswerIds = [];
 
@@ -63,54 +103,10 @@ export default function QuizPreview() {
     dispatch(addQuizAttempt(newQuizAttempt));
 
     checkAnswers();
+    dispatch(setQuizCorrectness(answerCorrectness));
 
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Results`);
   };
-
-  useEffect(() => {
-    const foundQuiz = quizzes.find((q: any) => q._id === qid);
-    if (foundQuiz) setQuiz(foundQuiz);
-  }, [qid, quizzes]);
-
-  const handleAnswerChange = (questionId: string, answer: string) => {
-    setUserAnswers({...userAnswers, [questionId]: answer});
-  };
-
-  const currentQuestion = questions[currentIndex];
-  if (!currentQuestion) return null;
-
-  const currentAnswers = possibleAnswers.filter(
-    (a) => a.questionId === currentQuestion._id
-  );
-
-  const [answerCorrectness, setAnswerCorrectness] = useState<any[]>([]);
-
-  const checkAnswers = async () => {
-    const newAnswerCorrectness = [];
-
-    for (const question of questions) {
-      let correct;
-
-      if (question.questionType === "FILL_BLANK") {
-        const possibleAnswersForQuestions = question.answers.map((answer: any) => answer.answerContent);
-        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
-
-        correct = possibleAnswersForQuestions.some((answerContent: string) =>
-          answerContent.toLowerCase().trim() === givenAnswersForQuestion[0].answerContent.toLowerCase().trim());
-      } else {
-        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
-
-        const selectedPossibleAnswer = question.answers.find((answer: any) =>
-          givenAnswersForQuestion[0].answerContent === answer._id);
-
-        correct = selectedPossibleAnswer.isCorrect;
-      }
-      newAnswerCorrectness.push({...question, correct});
-    }
-
-    setAnswerCorrectness(newAnswerCorrectness);
-    dispatch(setQuizCorrectness(newAnswerCorrectness));
-  }
 
   return (
     <div>

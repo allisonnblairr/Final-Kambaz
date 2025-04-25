@@ -2,7 +2,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  quizCorrectness: any,
+  quizCorrectness: [] as any[],
 };
 
 const quizCorrectnessSlice = createSlice({

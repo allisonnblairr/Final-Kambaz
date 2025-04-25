@@ -7,7 +7,7 @@ export default function QuizResults() {
 
   const calculatePoints = () => {
     let totalPoints = 0;
-    for (const answer of answerCorrectness) {
+    for (const answer of quizCorrectness) {
       let pointsOfQuestion = answer.points;
       if (answer.correct === true) {
         totalPoints += pointsOfQuestion;
