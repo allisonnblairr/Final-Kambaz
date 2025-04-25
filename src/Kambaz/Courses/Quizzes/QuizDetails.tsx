@@ -5,6 +5,7 @@ import { FaPencil } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import * as quizzesClient from "./client";
+import QuizResults from "./QuizResults";
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -12,6 +13,7 @@ export default function QuizDetails() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const navigate = useNavigate();
+  const [hasAttempt, setHasAttempt] = useState(false);
 
   useEffect(() => {
     const foundQuiz = quizzes.find((q: any) => q._id === qid);
@@ -32,23 +34,28 @@ export default function QuizDetails() {
     return finalDate;
   };
 
-  // leave this if we leave displaying correctness stuff here, take out questions stuff if not
-
-  const [questions, setQuestions] = useState<any[]>([]);
-
-  const fetchQuestions = async () => {
-    const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
-    setQuestions(questions);
-  };
-
-  useEffect(() => {
-    fetchQuestions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qid]);
+  const fetchQuizAttempt = async () => {
+      try {
+        const fetchedQuizAttempt = await quizzesClient.findQuizAttemptsForQuiz(qid as string);
+        if (!fetchedQuizAttempt || fetchedQuizAttempt.length === 0) {
+          setHasAttempt(false);
+          return;
+        }
+        setHasAttempt(true);
+      } catch (error) {
+        console.error("Error fetching quiz attempt:", error);
+        return [];
+      }
+    };
+  
+    useEffect(() => {
+      fetchQuizAttempt();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [qid]);
 
   return (
     <div className="quiz-details">
-      {currentUser.role === "STUDENT" && (
+      {currentUser.role === "STUDENT" && hasAttempt === false && (
         <>
           <h1> {quiz.title} </h1>
           <div
@@ -87,6 +94,10 @@ export default function QuizDetails() {
           </div>
         </>
       )}
+      { currentUser.role === "STUDENT" && hasAttempt === true && (
+        <QuizResults />
+      )
+      }
       {currentUser.role === "FACULTY" && (
         <>
           <div className="quiz-details-buttons d-flex justify-content-center my-4">

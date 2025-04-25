@@ -2,30 +2,21 @@
 import * as questionsClient from "./clientQuestion";
 import * as quizzesClient from "./client";
 import {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
+import { Button } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { updateQuiz } from "./reducer";
 
 export default function QuizResults() {
-  const {qid} = useParams();
-  const [questions, setQuestions] = useState<any[]>([]);
+  const {cid, qid} = useParams();
   const [answerCorrectness, setAnswerCorrectness] = useState<any[]>([]);
   const [totalPoints, setTotalPoints] = useState<number>(0);
-
-  useEffect(() => {
-    fetchResults();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qid]);
-
-
-  const fetchResults = async () => {
-    try {
-      const fetchedQuestions = await quizzesClient.findQuestionsForQuiz(qid as string);
-      setQuestions(fetchedQuestions);
-      await checkAnswers(questions);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-      return [];
-    }
-  };
+  const [possiblePoints, setPossiblePoints] = useState<number>(0);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {currentUser} = useSelector((state: any) => state.accountReducer);
+  const {quizzes} = useSelector((state: any) => state.quizzesReducer);
+  const [quiz, setQuiz] = useState<any>({});
 
   const checkAnswers = async (questionsList: any[]) => {
     if (!questionsList.length) return;
@@ -60,22 +51,69 @@ export default function QuizResults() {
     calculatePoints(correctnessArray);
   };
 
+  const fetchResults = async () => {
+    try {
+      const fetchedQuestions = await quizzesClient.findQuestionsForQuiz(qid as string);
+      await checkAnswers(fetchedQuestions);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    fetchResults();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qid]);
+
+  useEffect(() => {
+    const foundQuiz = quizzes.find((q: any) => q._id === qid);
+    if (foundQuiz) setQuiz(foundQuiz);
+  }, [qid, quizzes]);
+
   const calculatePoints = (answers: any[]) => {
     let points = 0;
+    let possiblePoints = 0;
     for (const answer of answers) {
       const pointsOfQuestion = answer.points || 0;
+      possiblePoints += pointsOfQuestion;
       if (answer.correct === true) {
         points += pointsOfQuestion;
       }
     }
     setTotalPoints(points);
+    setPossiblePoints(possiblePoints);
     return points;
   };
 
+  const handleLeavePage = async () => {
+    let calculatedPoints;
+    if (possiblePoints > 0) {
+      calculatedPoints = (totalPoints / possiblePoints) * 100 ;
+    } else {
+      calculatedPoints = 0;
+    }
+    if (currentUser.role === 'STUDENT') {
+      const updatedQuiz = {...quiz, score: calculatedPoints};
+      await quizzesClient.updateQuiz(updatedQuiz);
+      dispatch(updateQuiz(updatedQuiz));
+      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    } else {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    }
+  };
+
+  const getScorePercentage = () => {
+    if (possiblePoints === 0) return "0";
+    return `${((totalPoints / possiblePoints) * 100).toFixed(2)}%`;
+  };
+  
+
   return (
     <div className="quiz-results-container">
-      <h2>Quiz Results</h2>
-      <p>Total Points: {totalPoints}</p>
+      <h2>Quiz Results for {quiz.title} </h2>
+      <p><strong>Score:</strong> {getScorePercentage()}</p>
+      <p><strong>Total Points:</strong> {totalPoints}</p>
 
       <div className="answers-list">
         {
@@ -89,6 +127,13 @@ export default function QuizResults() {
           ))
         }
       </div>
+
+      <div className='d-flex justify-content-center align-items-center'>
+        <Button variant="danger" onClick={handleLeavePage}>
+          Return to Quiz Page
+        </Button>
+      </div>
+
     </div>
   );
 }

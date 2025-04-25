@@ -70,7 +70,7 @@ export default function QuizPreview() {
       userId: currentUser._id,
       quizId: qid,
       score: 100, // fix when doing scoring logic
-      dateTaken: new Date(),
+      dateTaken: new Date().toISOString(),
       answers: givenAnswerIds,
     };
 
