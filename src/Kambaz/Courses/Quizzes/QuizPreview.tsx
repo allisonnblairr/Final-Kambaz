@@ -7,7 +7,6 @@ import {useNavigate, useParams} from "react-router-dom";
 import * as quizzesClient from "./client";
 import * as questionsClient from "./clientQuestion";
 import {addQuizAttempt} from "./quizattemptreducer";
-import {setQuizCorrectness} from "./correctnessreducer";
 
 export default function QuizPreview() {
   const {cid, qid} = useParams();
@@ -51,30 +50,6 @@ export default function QuizPreview() {
     (a) => a.questionId === currentQuestion._id
   );
 
-  let answerCorrectness = [];
-
-  const checkAnswers = async () => {
-    for (const question of questions) {
-      let correct;
-
-      if (question.questionType === "FILL_BLANK") {
-        const possibleAnswersForQuestions = question.answers.map((answer: any) => answer.answerContent);
-        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
-
-        correct = possibleAnswersForQuestions.some((answerContent: string) =>
-          answerContent.toLowerCase().trim() === givenAnswersForQuestion[0].answerContent.toLowerCase().trim());
-      } else {
-        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
-
-        const selectedPossibleAnswer = question.answers.find((answer: any) =>
-          givenAnswersForQuestion[0].answerContent === answer._id);
-
-        correct = selectedPossibleAnswer.isCorrect;
-      }
-      answerCorrectness.push({...question, correct});
-    }
-  }
-
   const saveQuizAttempt = async () => {
     const givenAnswerIds = [];
 
@@ -101,9 +76,6 @@ export default function QuizPreview() {
 
     await quizzesClient.createQuizAttemptForQuiz(qid as string, newQuizAttempt);
     dispatch(addQuizAttempt(newQuizAttempt));
-
-    checkAnswers();
-    dispatch(setQuizCorrectness(answerCorrectness));
 
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Results`);
   };
