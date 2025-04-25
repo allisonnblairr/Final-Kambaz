@@ -38,12 +38,9 @@ export default function QuizPreview() {
     const givenAnswerIds = [];
 
     for (const [questionId, answer] of Object.entries(userAnswers)) {
-      const isText = typeof answer === "string";
       const newGivenAnswer = {
-        answerContent: isText
-          ? answer
-          : possibleAnswers.find((a) => a._id === answer)?.answerContent,
-        questionId,
+        answerContent: answer,
+        questionId
       };
 
       const savedAnswer = await questionsClient.createGivenAnswerForQuestion(
@@ -63,6 +60,10 @@ export default function QuizPreview() {
 
     await quizzesClient.createQuizAttemptForQuiz(qid as string, newQuizAttempt);
     dispatch(addQuizAttempt(newQuizAttempt));
+
+    checkAnswers();
+
+
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Details`);
   };
 
@@ -81,6 +82,41 @@ export default function QuizPreview() {
   const currentAnswers = possibleAnswers.filter(
     (a) => a.questionId === currentQuestion._id
   );
+
+  //TODO: FIGUREOUTMOVE
+
+
+  const answerCorrectness = [];
+
+  const checkAnswers = async () => {
+    for (const question of questions) {
+      let correct;
+
+      if (question.questionType === "FILL_BLANK") {
+        const possibleAnswersForQuestions = question.answers.map((answer: any) => answer.answerContent);
+        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
+
+        correct = possibleAnswersForQuestions.some((answerContent: string) =>
+          answerContent.toLowerCase().trim() === givenAnswersForQuestion[0].answerContent.toLowerCase().trim());
+      } else {
+        const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
+
+        const selectedPossibleAnswer = question.answers.find((answer: any) =>
+          givenAnswersForQuestion[0].answerContent === answer._id);
+
+        correct = selectedPossibleAnswer.isCorrect;
+      }
+      answerCorrectness.push([question, correct]);
+    }
+
+    console.log(answerCorrectness);
+  }
+
+
+
+
+
+
 
   return (
     <div>

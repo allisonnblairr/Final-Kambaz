@@ -4,6 +4,7 @@ import { Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { FaPencil } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import * as quizzesClient from "./client";
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -30,6 +31,20 @@ export default function QuizDetails() {
     })}`;
     return finalDate;
   };
+
+  // leave this if we leave displaying correctness stuff here, take out questions stuff if not
+
+  const [questions, setQuestions] = useState<any[]>([]);
+
+  const fetchQuestions = async () => {
+    const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
+    setQuestions(questions);
+  };
+
+  useEffect(() => {
+    fetchQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qid]);
 
   return (
     <div className="quiz-details">
