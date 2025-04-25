@@ -4,7 +4,7 @@ import { Button, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { FaPencil } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import * as quizzesClient from "./client";
+import * as userClient from '../../Account/client'
 import QuizResults from "./QuizResults";
 
 export default function QuizDetails() {
@@ -35,23 +35,24 @@ export default function QuizDetails() {
   };
 
   const fetchQuizAttempt = async () => {
-      try {
-        const fetchedQuizAttempt = await quizzesClient.findQuizAttemptsForQuiz(qid as string);
-        if (!fetchedQuizAttempt || fetchedQuizAttempt.length === 0) {
-          setHasAttempt(false);
-          return;
-        }
+    const fetchedQuizAttempt = await userClient.findQuizAttemptForUser(currentUser._id, cid as string, qid as string);
+  
+    if (fetchedQuizAttempt && fetchedQuizAttempt.length > 0) {
+      const attempt = fetchedQuizAttempt.find((attempt: any) => attempt.userId === currentUser._id);
+      if (attempt) {
         setHasAttempt(true);
-      } catch (error) {
-        console.error("Error fetching quiz attempt:", error);
-        return [];
+      } else {
+        setHasAttempt(false);
       }
-    };
+    } else {
+      setHasAttempt(false);
+    }
+  };  
   
     useEffect(() => {
       fetchQuizAttempt();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [qid]);
+    }, [qid, cid, currentUser._id]);
 
   return (
     <div className="quiz-details">

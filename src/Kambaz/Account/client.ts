@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 const axiosWithCredentials = axios.create({
@@ -67,7 +68,6 @@ export const signout = async () => {
   const response = await axiosWithCredentials.post(`${USERS_API}/signout`);
   return response.data;
 };
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const findCoursesForUser = async (_userId: string) => {
   const response = await axiosWithCredentials.get(
     `${USERS_API}/current/courses`
@@ -97,6 +97,16 @@ export const enrollIntoCourse = async (_userId: string, courseId: string) => {
 export const unenrollFromCourse = async (_userId: string, courseId: string) => {
   const response = await axiosWithCredentials.delete(
     `${USERS_API}/current/courses/${courseId}`
+  );
+  return response.data;
+};
+export const findQuizAttemptForUser = async (
+  userId: string,
+  courseId: string,
+  quizId: string
+) => {
+  const response = await axiosWithCredentials.get(
+    `${USERS_API}/${userId}/courses/${courseId}/quizzes/${quizId}/quizattempts`
   );
   return response.data;
 };
