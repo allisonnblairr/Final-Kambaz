@@ -1,24 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import { Button, Form } from "react-bootstrap";
-import { FaPencil } from "react-icons/fa6";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {Button, Form} from "react-bootstrap";
+import {FaPencil} from "react-icons/fa6";
+import {useDispatch, useSelector} from "react-redux";
+import {useNavigate, useParams} from "react-router-dom";
 import * as quizzesClient from "./client";
 import * as questionsClient from "./clientQuestion";
-import { v4 as uuidv4 } from "uuid";
-import { addQuizAttempt } from "./quizattemptreducer";
+import {addQuizAttempt} from "./quizattemptreducer";
 
 export default function QuizPreview() {
-  const { cid, qid } = useParams();
+  const {cid, qid} = useParams();
   const [quiz, setQuiz] = useState<any>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<any>({});
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const {currentUser} = useSelector((state: any) => state.accountReducer);
   const [questions, setQuestions] = useState<any[]>([]);
   const [possibleAnswers, setPossibleAnswers] = useState<any[]>([]);
 
-  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const {quizzes} = useSelector((state: any) => state.quizzesReducer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -26,19 +25,6 @@ export default function QuizPreview() {
   const fetchQuestions = async () => {
     const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
 
-    for (const question of questions) {
-      const resolvedAnswers = await Promise.all(
-        question.answers.map(async (answerId: string) => {
-          const answer =
-            await questionsClient.findPossibleAnswerForQuestionById(
-              qid as string,
-              answerId as string
-            );
-          return answer;
-        })
-      );
-      question.answers = resolvedAnswers;
-    }
     setPossibleAnswers(questions.flatMap((q: { answers: any }) => q.answers));
     setQuestions(questions);
   };
@@ -54,7 +40,6 @@ export default function QuizPreview() {
     for (const [questionId, answer] of Object.entries(userAnswers)) {
       const isText = typeof answer === "string";
       const newGivenAnswer = {
-        _id: uuidv4(),
         answerContent: isText
           ? answer
           : possibleAnswers.find((a) => a._id === answer)?.answerContent,
@@ -69,7 +54,6 @@ export default function QuizPreview() {
     }
 
     const newQuizAttempt = {
-      _id: uuidv4(),
       userId: currentUser._id,
       quizId: qid,
       score: 100, // fix when doing scoring logic
@@ -88,7 +72,7 @@ export default function QuizPreview() {
   }, [qid, quizzes]);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
-    setUserAnswers({ ...userAnswers, [questionId]: answer });
+    setUserAnswers({...userAnswers, [questionId]: answer});
   };
 
   const currentQuestion = questions[currentIndex];
@@ -101,9 +85,9 @@ export default function QuizPreview() {
   return (
     <div>
       <h1>{quiz.title}</h1>
-      <div style={{ color: "grey" }}>Started {new Date().toLocaleString()}</div>
+      <div style={{color: "grey"}}>Started {new Date().toLocaleString()}</div>
       <h4>{quiz.instructions}</h4>
-      <hr />
+      <hr/>
 
       <div className="question-box-container">
         <div
@@ -188,7 +172,7 @@ export default function QuizPreview() {
               color: "black",
             }}
           >
-            <FaPencil className="me-3" />
+            <FaPencil className="me-3"/>
             Keep Editing this Quiz
           </Button>
         </div>
