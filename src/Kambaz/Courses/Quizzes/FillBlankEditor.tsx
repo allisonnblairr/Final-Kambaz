@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {Form, Button} from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 
 interface Blank {
   answer: string;
   alternatives: string[];
 }
 
-export default function FillBlankEditor({blanks, setBlanks}:
-                                        {
-                                          blanks: Blank[];
-                                          setBlanks: any;
-                                        }) {
+export default function FillBlankEditor({
+  blanks,
+  setBlanks,
+}: {
+  blanks: Blank[];
+  setBlanks: any;
+}) {
   const handleAddAnswer = () => {
-    setBlanks([...blanks, {answer: "", alternatives: []}]);
+    setBlanks([...blanks, { answer: "", alternatives: [] }]);
   };
 
   const handleRemoveAnswer = (index: number) => {

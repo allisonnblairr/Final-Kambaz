@@ -38,7 +38,7 @@ export default function QuizMenu() {
           </InputGroup>
         </div>
         <div className="d-flex gap-1">
-          { currentUser.role == 'FACULTY' &&
+          {currentUser.role == "FACULTY" && (
             <Button
               variant="danger"
               size="lg"
@@ -51,7 +51,7 @@ export default function QuizMenu() {
               />
               Quiz
             </Button>
-          }
+          )}
           <Button
             className="btn-sm"
             style={{

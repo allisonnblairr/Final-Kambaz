@@ -8,18 +8,20 @@ import {
   addQuestion,
   updateQuestion,
   deleteQuestion,
-  setQuestions
+  setQuestions,
 } from "./questionsreducer";
 import * as client from "./client.ts";
 import * as courseClient from "../client.ts";
 
-export default function Questions({quiz}: {quiz: any}) {
+export default function Questions({ quiz }: { quiz: any }) {
   const { cid, qid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const questions = useSelector((state: any) =>
-    state.quizQuestionsReducer.quizquestions.filter((q: any) => q.quizId === qid)
+    state.quizQuestionsReducer.quizquestions.filter(
+      (q: any) => q.quizId === qid
+    )
   );
   const quizzes = useSelector((state: any) => state.quizzesReducer.quizzes);
 
@@ -54,14 +56,16 @@ export default function Questions({quiz}: {quiz: any}) {
   };
 
   const handleOpenEditor = (question?: any) => {
-    setQuestionToEdit(question || {
-      _id: `temp_${Date.now()}`,
-      title: "",
-      content: "",
-      questionType: "MULTIPLE_CHOICE",
-      points: 1,
-      quizId: qid
-    });
+    setQuestionToEdit(
+      question || {
+        _id: `temp_${Date.now()}`,
+        title: "",
+        content: "",
+        questionType: "MULTIPLE_CHOICE",
+        points: 1,
+        quizId: qid,
+      }
+    );
     setShowEditor(true);
   };
 
@@ -86,14 +90,16 @@ export default function Questions({quiz}: {quiz: any}) {
   const handleSaveAll = async () => {
     if (qid) {
       try {
-        
         let quizId = qid;
         const quizExists = !!quizzes.find((quiz: any) => quiz._id === qid);
 
         if (!quizExists) {
-          const createdQuiz = await courseClient.createQuizForCourse(cid as string, {
-            ...quiz,
-          });
+          const createdQuiz = await courseClient.createQuizForCourse(
+            cid as string,
+            {
+              ...quiz,
+            }
+          );
           quizId = createdQuiz._id;
         }
 
@@ -110,12 +116,12 @@ export default function Questions({quiz}: {quiz: any}) {
         for (const reducerQ of questions) {
           let questionId = reducerQ._id;
 
-          if (reducerQ._id.startsWith('temp_')) {
+          if (reducerQ._id.startsWith("temp_")) {
             const newQuestion = await client.createQuestionForQuiz(quizId, {
               title: reducerQ.title,
               questionType: reducerQ.questionType,
               content: reducerQ.content,
-              points: reducerQ.points
+              points: reducerQ.points,
             });
 
             questionId = newQuestion._id;
@@ -123,20 +129,24 @@ export default function Questions({quiz}: {quiz: any}) {
             const possibleAnswers = [];
             if (reducerQ.answers && reducerQ.answers.length > 0) {
               for (const answer of reducerQ.answers) {
-                const createdAnswer = await client.createPossibleAnswer(questionId, {
-                  answerContent: answer.answerContent,
-                  isCorrect: answer.isCorrect
-                });
+                const createdAnswer = await client.createPossibleAnswer(
+                  questionId,
+                  {
+                    answerContent: answer.answerContent,
+                    isCorrect: answer.isCorrect,
+                  }
+                );
                 possibleAnswers.push(createdAnswer._id);
               }
             }
 
             await client.updateQuestion(questionId, {
-              answers: possibleAnswers
+              answers: possibleAnswers,
             });
-
           } else {
-            const existingAnswers = await client.findPossibleAnswersForQuestion(questionId);
+            const existingAnswers = await client.findPossibleAnswersForQuestion(
+              questionId
+            );
             for (const answer of existingAnswers) {
               await client.deletePossibleAnswer(answer._id);
             }
@@ -144,16 +154,19 @@ export default function Questions({quiz}: {quiz: any}) {
             const possibleAnswers = [];
             if (reducerQ.answers && reducerQ.answers.length > 0) {
               for (const answer of reducerQ.answers) {
-                const createdAnswer = await client.createPossibleAnswer(questionId, {
-                  answerContent: answer.answerContent,
-                  isCorrect: answer.isCorrect
-                });
+                const createdAnswer = await client.createPossibleAnswer(
+                  questionId,
+                  {
+                    answerContent: answer.answerContent,
+                    isCorrect: answer.isCorrect,
+                  }
+                );
                 possibleAnswers.push(createdAnswer._id);
               }
             }
 
             await client.updateQuestion(questionId, {
-              answers: possibleAnswers
+              answers: possibleAnswers,
             });
           }
 
@@ -167,9 +180,9 @@ export default function Questions({quiz}: {quiz: any}) {
           await client.updateQuiz({
             ...currentQuiz,
             points: totalPoints.toString(),
-            questions: finalQuestionIds
+            questions: finalQuestionIds,
           });
-        } 
+        }
 
         const refreshedQuestions = await client.findQuestionsForQuiz(quizId);
         dispatch(setQuestions(refreshedQuestions));
@@ -193,17 +206,17 @@ export default function Questions({quiz}: {quiz: any}) {
   return (
     <div>
       <div className="text-center">
-        <br/>
+        <br />
         <Button
           className="btn btn-secondary px-3 py-2"
           onClick={() => handleOpenEditor()}
         >
           + New Question
         </Button>
-        <br/>
-        <hr/>
+        <br />
+        <hr />
         <h4>Total Quiz Points: {calculatePoints()}</h4>
-        <hr/>
+        <hr />
       </div>
 
       {showEditor && (
@@ -238,7 +251,7 @@ export default function Questions({quiz}: {quiz: any}) {
           <p>Content: {question.content}</p>
           <p>Type: {question.questionType}</p>
           <p>Points: {question.points}</p>
-          <hr/>
+          <hr />
         </div>
       ))}
 

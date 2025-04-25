@@ -1,10 +1,12 @@
 import { Form } from "react-bootstrap";
 
-export default function TrueFalseEditor({ selectedAnswer, setSelectedAnswer }:
-  {
-    selectedAnswer: boolean | null;
-    setSelectedAnswer: (answer: boolean) => void
-  }) {
+export default function TrueFalseEditor({
+  selectedAnswer,
+  setSelectedAnswer,
+}: {
+  selectedAnswer: boolean | null;
+  setSelectedAnswer: (answer: boolean) => void;
+}) {
   return (
     <div className="mt-3">
       <Form.Label>Correct Answer:</Form.Label>

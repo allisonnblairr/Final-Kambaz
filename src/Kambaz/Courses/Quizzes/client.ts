@@ -16,7 +16,7 @@ export const deleteQuiz = async (quizId: string) => {
   return response.data;
 };
 export const updateQuiz = async (quiz: any) => {
-  const {data} = await axiosWithCredentials.put(
+  const { data } = await axiosWithCredentials.put(
     `${QUIZZES_API}/${quiz._id}`,
     quiz
   );
@@ -50,7 +50,7 @@ export const deleteQuizQuestion = async (questionId: string) => {
     `${QUESTIONS_API}/${questionId}`
   );
   return response.data;
-}
+};
 
 export const findPossibleAnswersForQuestion = async (questionId: string) => {
   const response = await axiosWithCredentials.get(
@@ -60,14 +60,20 @@ export const findPossibleAnswersForQuestion = async (questionId: string) => {
   return response.data;
 };
 
-export const findPossibleAnswerById = async (questionId: string, paId: string) => {
+export const findPossibleAnswerById = async (
+  questionId: string,
+  paId: string
+) => {
   const response = await axiosWithCredentials.get(
     `${QUESTIONS_API}/${questionId}/possibleanswers/${paId}`
   );
   return response.data;
 };
 
-export const createPossibleAnswer = async (questionId: string, possibleAnswer: any) => {
+export const createPossibleAnswer = async (
+  questionId: string,
+  possibleAnswer: any
+) => {
   const response = await axiosWithCredentials.post(
     `${QUESTIONS_API}/${questionId}/possibleanswers`,
     possibleAnswer
