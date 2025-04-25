@@ -21,6 +21,8 @@ export default function QuizPreview() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const [displayCorrectness, setDisplayCorrectness] = useState(false);
+
   // this may change depending on logic we use for questions editor
   const fetchQuestions = async () => {
     const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
@@ -63,8 +65,9 @@ export default function QuizPreview() {
 
     checkAnswers();
 
-
-    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Details`);
+    // display correct answers on page for now
+    setDisplayCorrectness(true);
+//    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Details`);
   };
 
   useEffect(() => {
@@ -96,11 +99,14 @@ export default function QuizPreview() {
         const possibleAnswersForQuestions = question.answers.map((answer: any) => answer.answerContent);
         const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
 
+        // checks the first, and just the first
+        // we need to figure out how it's linked to the quiz attempt
         correct = possibleAnswersForQuestions.some((answerContent: string) =>
           answerContent.toLowerCase().trim() === givenAnswersForQuestion[0].answerContent.toLowerCase().trim());
       } else {
         const givenAnswersForQuestion = await questionsClient.findGivenAnswersForQuestion(question._id);
 
+        // same here
         const selectedPossibleAnswer = question.answers.find((answer: any) =>
           givenAnswersForQuestion[0].answerContent === answer._id);
 
@@ -108,15 +114,18 @@ export default function QuizPreview() {
       }
       answerCorrectness.push([question, correct]);
     }
-
-    console.log(answerCorrectness);
   }
 
-
-
-
-
-
+  const calculatePoints = () => {
+    let totalPoints = 0;
+    for (const answerPair of answerCorrectness) {
+      let pointsOfQuestion = answerPair[0].points;
+      if (answerPair[1] === true) {
+        totalPoints += pointsOfQuestion;
+      }
+    }
+    return totalPoints;
+  }
 
   return (
     <div>
@@ -196,6 +205,22 @@ export default function QuizPreview() {
           </Button>
         )}
       </div>
+
+      {/* an attempt to display results, however this is not linked to anything so will not work{*/}
+      {/* will try to create a new page and pass stuff there {*/}
+      {/*  displayCorrectness && (*/}
+      {/*    <div>*/}
+      {/*      {answerCorrectness.map((answerPair: any) => (*/}
+      {/*              <div>*/}
+      {/*          <p>{answerPair[0].content}</p>*/}
+      {/*          <p>{answerPair[1]}</p>*/}
+      {/*              </div>*/}
+      {/*      ))*/}
+      {/*      }*/}
+      {/*  </div>*/}
+      {/*  )*/}
+      {/*}*/}
+
 
       {currentUser.role === "FACULTY" && (
         <div className="quiz-details-buttons d-flex justify-content-center my-4">
